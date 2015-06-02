@@ -1,0 +1,21 @@
+parameters:
+    mailer_transport: sendmail
+    mailer_host: '/usr/lib/sendmail -t -i'
+    mailer_user: null
+    mailer_password: null
+    locale: en
+    secret: ThisTokenIsNotSoSecretChangeIt
+    current_environnement: devbis
+    sql_user: dev_vm_gestelco
+    sql_password: dev_vm_gestelco
+    base_subdomain_master: db_prod_master
+    base_subdomain_slave: db_prod_slave
+    domain_vm: vm.omertelecom.fr
+
+    # Flag used to allow/disallow ws sfr time restriction
+    use_ws_sfr_time_restriction: true
+
+    # Webservices configuration
+    webservices.gestionlogistique: 'http://gestionlogistique.%current_environnement%.%domain_vm%/ws/gestionretour'
+    webservices.relais_pates: 'http://relais_pates.%current_environnement%.%domain_vm%/server.php'
+    webservices.gestioncommunication: 'http://gestioncommunication.%current_environnement%.%domain_vm%/email'

@@ -1,0 +1,42 @@
+imports:
+    - { resource: config.yml }
+
+framework:
+    router:
+        resource: "%kernel.root_dir%/config/routing_r7.yml"
+        strict_requirements: true
+    profiler: { only_exceptions: false }
+
+monolog: 
+    handlers:
+        syslog:
+            type: syslog
+            level: debug
+        main:
+            type:  stream
+            path:  "%kernel.logs_dir%/app-main.log"
+            level: debug
+            formatter: monolog.formatter
+            channels: ['!event', '!doctrine', '!console', '!cron']
+        doctrine:
+            type: stream
+            path: "%kernel.logs_dir%/app-doctrine.log"
+            level: debug
+            formatter: monolog.formatter
+            channels: [doctrine]
+        error:
+            type: stream
+            path: "%kernel.logs_dir%/app-error.log"
+            level: error
+        console:
+            type: stream
+            path: "%kernel.logs_dir%/app-console.log"
+            level: debug
+            formatter: monolog.formatter
+            channels: [console, cron]
+
+assetic:
+    use_controller: true
+
+swiftmailer:
+     delivery_address: gestionreferentiel_extract@test.virginmobile.fr

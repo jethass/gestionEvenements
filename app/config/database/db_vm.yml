@@ -1,0 +1,125 @@
+parameters:
+    brand: vm
+    appbrand: gestiontelco
+    user_base: /home/  
+    default_db_port:           3306
+    default_db_driver:         pdo_mysql    
+    main_db_name:              MAIN_VM
+    provision_db_name:         PROVISIONING_PATES
+    recou_db_name:             RECOUVREMENT_VM
+    hexavia_db_name:           HEXAVIA
+
+doctrine:
+    dbal:
+        default_connection: main
+        connections:
+            default:
+                driver:   %default_db_driver%
+                host:     %base_subdomain_master%.%current_environnement%.%domain_vm%
+                port:     %default_db_port%
+                dbname:   %provision_db_name%
+                user:     %sql_user%
+                password: %sql_password%
+                slaves:
+                    slave1:
+                        host:     %base_subdomain_slave%.%current_environnement%.%domain_vm%
+                        dbname:   %provision_db_name%
+                        user:     %sql_user%
+                        password: %sql_password%
+                charset:  UTF8
+                logging: "%kernel.debug%"
+                mapping_types:
+                    enum: string
+
+            main:
+                driver:   %default_db_driver%
+                host:     %base_subdomain_master%.%current_environnement%.%domain_vm%
+                port:     %default_db_port%
+                dbname:   %main_db_name%
+                user:     %sql_user%
+                password: %sql_password%
+                slaves:
+                    slave1:
+                        host:     %base_subdomain_slave%.%current_environnement%.%domain_vm%
+                        dbname:   %main_db_name%
+                        user:     %sql_user%
+                        password: %sql_password%
+                charset:  UTF8
+                logging: "%kernel.debug%"
+                mapping_types:
+                    enum: string
+
+            recou:
+                driver:   %default_db_driver%
+                host:     %base_subdomain_master%.%current_environnement%.%domain_vm%
+                port:     %default_db_port%
+                dbname:   %recou_db_name%
+                user:     %sql_user%
+                password: %sql_password%
+                slaves:
+                    slave1:
+                        host:     %base_subdomain_slave%.%current_environnement%.%domain_vm%
+                        dbname:   %recou_db_name%
+                        user:     %sql_user%
+                        password: %sql_password%
+                charset:  UTF8
+                logging: "%kernel.debug%"
+                mapping_types:
+                    enum: string
+
+            hexavia:
+                driver:   %default_db_driver%
+                host:     %base_subdomain_master%.%current_environnement%.%domain_vm%
+                port:     %default_db_port%
+                dbname:   %hexavia_db_name%
+                user:     %sql_user%
+                password: %sql_password%
+                slaves:
+                    slave1:
+                        host:     %base_subdomain_slave%.%current_environnement%.%domain_vm%
+                        dbname:   %hexavia_db_name%
+                        user:     %sql_user%
+                        password: %sql_password%
+                charset:  UTF8
+                logging: "%kernel.debug%"
+                mapping_types:
+                    enum: string
+
+           
+    orm:
+        auto_generate_proxy_classes: "%kernel.debug%"
+        default_entity_manager:   default
+        entity_managers:
+            default:
+                connection: default
+                mappings:
+                    OmeaGestionTelcoPatesBundle: ~
+            main:
+                connection: main
+                mappings:
+                    Omea:
+                        type: annotation
+                        is_bundle: false
+                        dir: "%kernel.root_dir%/../vendor/omea/domain/src/Omea/Domain/Main"
+                        prefix: Omea\Domain\Main
+                        alias: Main
+                    SfrLightMvnoBundle: ~
+
+            recou:
+                connection: recou
+                mappings:
+                    Omea:
+                        type: annotation
+                        is_bundle: false
+                        dir: "%kernel.root_dir%/../vendor/omea/domain/src/Omea/Domain/Recouvrement"
+                        prefix: Omea\Domain\Recouvrement
+                        alias: Recouvrement
+            hexavia:
+                connection: hexavia
+                mappings:
+                    Omea:
+                        type: annotation
+                        is_bundle: false
+                        dir: "%kernel.root_dir%/../vendor/omea/domain/src/Omea/Domain/Hexavia"
+                        prefix: Omea\Domain\Hexavial
+                        alias: Hexavia

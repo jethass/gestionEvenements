@@ -1,0 +1,166 @@
+imports:
+    - { resource: parameters.yml }
+    - { resource: security.yml }
+    - { resource: services.yml }
+#    - { resource: database/db_vm.yml }
+
+# Doctrine Configuration
+doctrine:
+    dbal:
+        default_connection: main
+        connections:
+            default:
+                
+                driver:   "%database_driver%"
+                host:     "%database_host%"
+                port:     "%database_port%"
+                dbname:   "%database_name%"
+                user:     "%database_user%"
+                password: "%database_password%"
+                charset:  UTF8
+        # if using pdo_sqlite as your database driver:
+        #   1. add the path in parameters.yml
+        #     e.g. database_path: "%kernel.root_dir%/data/data.db3"
+        #   2. Uncomment database_path in parameters.yml.dist
+        #   3. Uncomment next line:
+        #     path:     "%database_path%"
+        
+            main:
+                driver:   %database_driver%
+                host:     %database_host%
+                port:     %database_port%
+                dbname:   %database_name%
+                user:     %database_user%
+                password: %database_password%
+                charset:  UTF8
+               
+
+    orm:
+        auto_generate_proxy_classes: "%kernel.debug%"
+        default_entity_manager:   default
+        entity_managers:
+            default:
+                connection: default
+                mappings:
+                    OmeaGestionTelcoPatesBundle: ~
+            main:
+                connection: main
+                mappings:
+                    Omea:
+                        type: annotation
+                        is_bundle: false
+                        dir: "%kernel.root_dir%/../vendor/omea/domain/src/Omea/Domain/Main"
+                        prefix: Omea\Domain\Main
+                        alias: Main
+                    SfrLightMvnoBundle: ~
+
+
+framework:
+    #esi:             ~
+    #translator:      { fallback: "%locale%" }
+    secret:          "%secret%"
+    router:
+        resource: "%kernel.root_dir%/config/routing.yml"
+        strict_requirements: ~
+    form:            ~
+    csrf_protection: ~
+    validation:      { enable_annotations: true }
+    templating:
+        engines: ['twig']
+        #assets_version: SomeVersionScheme
+    default_locale:  "%locale%"
+    trusted_hosts:   ~
+    trusted_proxies: ~
+    session:
+        # handler_id set to null will use default session handler from php.ini
+        handler_id:  ~
+    fragments:       ~
+    http_method_override: true
+
+# Twig Configuration
+twig:
+    debug:            "%kernel.debug%"
+    strict_variables: "%kernel.debug%"
+
+# Assetic Configuration
+assetic:
+    debug:          "%kernel.debug%"
+    use_controller: false
+    bundles:        [ ]
+    #java: /usr/bin/java
+    filters:
+        cssrewrite: ~
+        #closure:
+        #    jar: "%kernel.root_dir%/Resources/java/compiler.jar"
+        #yui_css:
+        #    jar: "%kernel.root_dir%/Resources/java/yuicompressor-2.4.7.jar"
+
+# Swiftmailer Configuration
+swiftmailer:
+    transport: "%mailer_transport%"
+    host:      "%mailer_host%"
+    username:  "%mailer_user%"
+    password:  "%mailer_password%"
+    spool:     { type: memory }
+
+monolog:
+    channels: ['console']
+
+# OmeaGestionTelcoPatesBundle Configuration
+omea_gestion_telco_pates:
+    femto_parameters:
+        option_id: 683
+        fap_latitude: 48.8988
+        fap_longitude: 2.2933
+        id_art: 42
+    import_service:
+        data_path: /home/gestiontelco_vm/DATA/
+    order_manager:
+        crm:
+            idDis: 500
+            idMag: 80
+            idArt: 556000
+            transTraite: null
+    relais_service:
+        use_ws_sfr_time_restriction: %use_ws_sfr_time_restriction%
+        error_code_to_skip: ["PG014", "PG015", "VM001", "VM002"]
+        parameters:
+            femto:
+                time_start: 00:00:00
+                time_end: 02:00:00
+                interval: 10
+                actions: ["ACTIVATION", "RESILIATION", "CHANGE_HOST"]
+                ws:
+                    location: %webservices.relais_pates%?service=OMSServiceIns
+                    wsdl: %webservices.relais_pates%?wsdl&service=OMSServiceIns
+            acl:
+                time_start: 08:00:00
+                time_end: 20:00:00
+                interval: 5
+                actions: ["ADD_MSISDN", "REMOVE_MSISDN", "CHANGE_MSISDN", "CHANGE_IMSI"]
+                ws:
+                    location: %webservices.relais_pates%?service=OMSAclServiceIns
+                    wsdl: %webservices.relais_pates%?wsdl&service=OMSAclServiceIns
+            order:
+                actions: ["COMMANDE"]
+        services:
+            activation:
+                ws_method: createFAP
+            resiliation:
+                ws_method: deleteFAP
+            change_host:
+                ws_method: changeFAPHostMSISDN
+            add_msisdn:
+                ws_method: createSecondaryUser
+            remove_msisdn:
+                ws_method: deleteSecondaryUser
+            change_msisdn:
+                ws_method: changeSecondaryUserMSISDN
+            change_imsi:
+                ws_method: changeSecondaryUserIMSI
+    user_service:
+                valid_state_code: [0, 1, 2]
+# SfrLightMvnoBundle Configuration
+sfr_light_mvno:
+    simcenter_import_service:
+        data_path: %kernel.root_dir%/../DATA

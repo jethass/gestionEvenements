@@ -1,0 +1,5 @@
+services:
+    soap.client:
+        class: SoapClientBundle\Services\SoapClientService
+        arguments: ['@logger']
+        tags: [{ name: monolog.logger, channel: soapclient }]

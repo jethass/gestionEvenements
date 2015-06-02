@@ -1,0 +1,14 @@
+Omea\GestionTelco\EvenementsBundle\Types\SaveEvenementRequest:
+    properties:
+        msisdn:
+            - NotBlank: ~
+            - NotNull: ~
+            - Omea\GestionTelco\EvenementsBundle\Validator\Constraint\IsValidMSISDN: ~
+        code:
+            - NotBlank: ~
+            - NotNull: ~
+            - Omea\GestionTelco\EvenementsBundle\Validator\Constraint\IsValidCODE: ~
+        type:
+            - NotBlank: ~
+            - NotNull: ~
+            - Omea\GestionTelco\EvenementsBundle\Validator\Constraint\IsValidTYPE: ~     

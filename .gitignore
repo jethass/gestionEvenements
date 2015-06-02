@@ -1,47 +1,15 @@
-# Symfony directories
-vendor/*
-*/logs/*
-*/cache/*
-web/uploads/*
-web/bundles/*
-
-# Parameters
-/app/config/parameters.yml
-/app/config/parameters.ini
-
-# Managed by Composer
-/app/bootstrap.php.cache
-/var/bootstrap.php.cache
-/bin/*
-!bin/console
-!bin/symfony_requirements
-/vendor/
-
-# Assets and user uploads
 /web/bundles/
-/web/uploads/
-
-# PHPUnit
-/app/phpunit.xml
-/phpunit.xml
-
-# Build data
-/build/
-
-# Composer PHAR
-/composer.phar
-
-# IDE specificities
-# Netbean
-nbproject/
-# Gedit
-*~
-# Eclipse
-.project
-.settings/org.eclipse.php.core.prefs
-
-# Composer
-composer.lock
-
-# Bootstrap
-app/bootstrap*
+/app/bootstrap*
+/app/cache/*
+/app/logs/*
+/vendor/
+/app/config/parameters.yml
+/conf/*
+/db/*
+/hooks/*
+/locks/*
+/.idea/*
+/bin/*
+/app/SymfonyRequirements.php
+/app/check.php
+/web/config.php

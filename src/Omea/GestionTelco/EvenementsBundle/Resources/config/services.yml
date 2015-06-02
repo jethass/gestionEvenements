@@ -1,0 +1,13 @@
+services:
+    omea_gestion_telco_evenements.services.evenements:
+        class: Omea\GestionTelco\EvenementsBundle\Services\EvenementsService
+        arguments:
+            - @validator
+            - @logger
+            - @omea_gestion_telco_evenements.services.saveevenement
+
+    omea_gestion_telco_evenements.services.saveevenement:
+        class: Omea\GestionTelco\EvenementsBundle\Services\SaveEvenementService
+        arguments:
+            - @logger
+            - @doctrine

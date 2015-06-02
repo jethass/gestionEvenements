@@ -1,0 +1,7 @@
+omea_gestion_telco_evenements_soap_server:
+    pattern: /
+    defaults: { _controller: 'OmeaGestionTelcoEvenementsBundle:SoapServer:soap' }
+
+omea_gestion_telco_evenements_soap_server_wsdl:
+    pattern:  /wsdl
+    defaults: { _controller: 'OmeaGestionTelcoEvenementsBundle:SoapServer:wsdl' }

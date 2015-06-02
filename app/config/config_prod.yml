@@ -1,0 +1,52 @@
+imports:
+    - { resource: config.yml }
+
+#framework:
+#    validation:
+#        cache: apc
+
+#doctrine:
+#    orm:
+#        metadata_cache_driver: apc
+#        result_cache_driver: apc
+#        query_cache_driver: apc
+
+monolog:
+    handlers:
+        syslog:
+            type: syslog
+            level: error
+            channels: ['!event']
+        main:
+            type: fingers_crossed
+            action_level: error
+            handler: nested_main
+        nested_main:
+            type: rotating_file
+            max_files: 10
+            path:  "%kernel.logs_dir%/app-main.log"
+            formatter: monolog.formatter
+            channels: ['!event', '!doctrine', '!console', '!cron']
+            level: debug
+        doctrine:
+            type: fingers_crossed
+            action_level: error
+            handler: nested_doctrine
+        nested_doctrine:
+            type: rotating_file
+            max_files: 10
+            path:  "%kernel.logs_dir%/app-doctrine.log"
+            formatter: monolog.formatter
+            channels: [doctrine]
+            level: debug
+        console:
+            type: fingers_crossed
+            action_level: error
+            handler: nested_console
+        nested_console:
+            type: rotating_file
+            max_files: 10
+            path: "%kernel.logs_dir%/app-console.log"
+            formatter: monolog.formatter
+            channels: [console, cron]
+            level: debug

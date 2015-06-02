@@ -1,0 +1,7 @@
+services:
+    sfr_light_mvno.services.simcenter_import_service:
+        class: Omea\GestionTelco\SfrLightMvnoBundle\Services\SimCenterImportService
+        arguments:
+            - @logger
+            - @doctrine
+            - %sfr_light_mvno.simcenter_import_service%

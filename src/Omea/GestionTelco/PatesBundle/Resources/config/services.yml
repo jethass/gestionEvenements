@@ -1,0 +1,58 @@
+services:
+    omea_gestion_telco_pates.services.pates:
+        class: Omea\GestionTelco\PatesBundle\Services\PatesService
+        arguments:
+            - @validator
+            - @logger
+            - @omea_gestion_telco_pates.services.eligibility
+            - @omea_gestion_telco_pates.services.device
+            - @omea_gestion_telco_pates.services.user
+
+    omea_gestion_telco_pates.services.eligibility:
+        class: Omea\GestionTelco\PatesBundle\Services\Femto\EligibilityService
+        arguments:
+            - @logger
+            - @doctrine
+            - %omea_gestion_telco_pates.femto_parameters%
+
+    omea_gestion_telco_pates.services.device:
+        class: Omea\GestionTelco\PatesBundle\Services\Femto\DeviceService
+        arguments:
+            - @logger
+            - @doctrine
+            - @omea_gestion_telco_pates.services.eligibility
+            - @omea_gestion_telco_pates.manager.order
+            - %omea_gestion_telco_pates.order_manager%
+            - @soap.client
+            - %webservices.gestionlogistique%
+            - %webservices.gestioncommunication%
+            - %omea_gestion_telco_pates.femto_parameters%
+            - @omea_gestion_telco_pates.services.user
+
+    omea_gestion_telco_pates.services.user:
+        class: Omea\GestionTelco\PatesBundle\Services\Femto\UserService
+        arguments: [@logger, @doctrine, %omea_gestion_telco_pates.user_service%]
+
+    omea_gestion_telco_pates.manager.order:
+        class: Omea\GestionTelco\PatesBundle\Manager\OrderManager
+        arguments: [@doctrine.orm.main_entity_manager, @logger]
+
+    omea_gestion_telco_pates.services.relais:
+        class: Omea\GestionTelco\PatesBundle\Services\RelaisService
+        arguments:
+            - @logger
+            - @doctrine
+            - @soap.client
+            - %omea_gestion_telco_pates.relais_service%
+            - %omea_gestion_telco_pates.femto_parameters%
+        tags:
+            - { name: monolog.logger, channel: cron }
+
+    omea_gestion_telco_pates.services.import:
+        class: Omea\GestionTelco\PatesBundle\Services\ImportService
+        arguments:
+            - @logger
+            - @doctrine
+            - %omea_gestion_telco_pates.import_service%
+        tags:
+            - { name: monolog.logger, channel: cron }

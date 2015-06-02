@@ -1,0 +1,7 @@
+omea_gestion_telco_evenements:
+    resource: "@OmeaGestionTelcoEvenementsBundle/Resources/config/routing.yml"
+    prefix:   /ws/evenements
+
+omea_gestion_telco_pates:
+    resource: "@OmeaGestionTelcoPatesBundle/Resources/config/routing.yml"
+    prefix:   /ws/pates

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- http://www.phpunit.de/manual/current/en/appendixes.configuration.html -->
+<phpunit
+        backupGlobals               = "false"
+        backupStaticAttributes      = "false"
+        colors                      = "true"
+        convertErrorsToExceptions   = "true"
+        convertNoticesToExceptions  = "true"
+        convertWarningsToExceptions = "true"
+        processIsolation            = "false"
+        stopOnFailure               = "false"
+        syntaxCheck                 = "false"
+        bootstrap                   = "bootstrap.php.cache"
+        >
+    <testsuites>
+        <testsuite name="PrepaymentBundle">
+            <directory>../src/Omea/GestionTelco/PatesBundle/Tests</directory>
+        </testsuite>
+        <testsuite name="SfrLightMvnoBundle">
+            <directory>../src/Omea/GestionTelco/SfrLightMvnoBundle/Tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist>
+            <directory suffix=".php">../src</directory>
+        </whitelist>
+        <blacklist>
+            <directory suffix=".php">../vendor</directory>
+            <directory suffix=".php">../app</directory>
+        </blacklist>
+    </filter>
+
+    <php>
+        <server name="KERNEL_DIR" value="app/" />
+        <server name="ENV" value="dev" />
+        <server name="DEBUG" value="false" />
+    </php>
+</phpunit>
