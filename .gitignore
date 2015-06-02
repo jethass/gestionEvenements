@@ -1,14 +1,9 @@
-# Cache and logs (Symfony2)
-/app/cache/*
-/app/logs/*
-!app/cache/.gitkeep
-!app/logs/.gitkeep
-
-# Cache and logs (Symfony3)
-/var/cache/*
-/var/logs/*
-!var/cache/.gitkeep
-!var/logs/.gitkeep
+# Symfony directories
+vendor/*
+*/logs/*
+*/cache/*
+web/uploads/*
+web/bundles/*
 
 # Parameters
 /app/config/parameters.yml
@@ -35,3 +30,18 @@
 
 # Composer PHAR
 /composer.phar
+
+# IDE specificities
+# Netbean
+nbproject/
+# Gedit
+*~
+# Eclipse
+.project
+.settings/org.eclipse.php.core.prefs
+
+# Composer
+composer.lock
+
+# Bootstrap
+app/bootstrap*
