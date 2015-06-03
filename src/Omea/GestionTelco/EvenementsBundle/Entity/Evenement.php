@@ -3,6 +3,7 @@
 namespace Omea\GestionTelco\EvenementsBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Omea\GestionTelco\EvenementsBundle\EvenementManager\EvenementInterface;
 
 /**
  * Evenement
@@ -10,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table()
  * @ORM\Entity(repositoryClass="Omea\GestionTelco\EvenementsBundle\Entity\EvenementRepository")
  */
-class Evenement
+class Evenement implements EvenementInterface
 {
     /**
      * @var integer

@@ -38,22 +38,25 @@ class SaveEvenementService extends AbstractService
     {
         
         $this->logger->debug('save evenement begin');
-        
-        $msisdn = $request->msisdn;
-        $code = $request->code;
-        $type= $request->type;
-        $evenement= new Evenement();
-        $evenement->setMsisdn($msisdn);
-        $evenement->setCode($code);
-        $evenement->setType($type);
-        $evenement->setDateAppel(new \Datetime('now'));
-        $evenement->setDateTraitement(Null);
-        $evenement->setCodeRetour(null);
 
-        $this->em->persist($evenement);
-        $this->em->flush();
-        
-        return "Inserted OK";
+        if($request->msisdn && $request->code && $request->type ){
+            $evenement= new Evenement();
+            $msisdn = $request->msisdn;
+            $code = $request->code;
+            $type= $request->type;
+
+            $evenement->setMsisdn($msisdn);
+            $evenement->setCode($code);
+            $evenement->setType($type);
+            $evenement->setDateAppel(new \Datetime('now'));
+            $evenement->setDateTraitement(Null);
+            $evenement->setCodeRetour(null);
+
+            $this->em->persist($evenement);
+            $this->em->flush();
+
+            return "Inserted OK";
+        }
 
     }
 

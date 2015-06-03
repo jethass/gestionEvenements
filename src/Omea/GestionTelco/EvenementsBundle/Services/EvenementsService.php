@@ -15,6 +15,8 @@ use Omea\GestionTelco\EvenementsBundle\Types\BaseResponse;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Omea\GestionTelco\EvenementsBundle\EventManager\EventManager;
+use Omea\GestionTelco\EvenementsBundle\Entity\EvenementRepository;
 
 
 class EvenementsService
@@ -33,12 +35,32 @@ class EvenementsService
     * @var SaveEvenementService
     */
    private $saveEvenementService;
+   
+   /**
+    *
+    * @var \Omea\GestionTelco\EvenementsBundle\Manager\Eventmanager
+    */
+   private $eventManager;
+   
+   /**
+    *
+    * @var \Omea\GestionTelco\EvenementsBundle\Entity\EvenementRepository
+    */
+   private $evenementRepository;
 
-    public function __construct(ValidatorInterface $validator,LoggerInterface $logger,SaveEvenementService $saveEvenementService)
+    public function __construct(
+        ValidatorInterface $validator,
+        LoggerInterface $logger,
+        SaveEvenementService $saveEvenementService,
+        EventManager $eventManager,
+        EvenementRepository $evenementRepository
+    )
     {
         $this->validator = $validator;
         $this->logger = $logger;
         $this->saveEvenementService = $saveEvenementService;
+        $this->eventManager = $eventManager;
+        $this->evenementRepository = $evenementRepository;
     }
 
     /**
@@ -59,7 +81,18 @@ class EvenementsService
 
         return $response;
     }
-
+    
+    public function handleEvenements()
+    {
+        $evenements = $this->evenementRepository->findBy(array('dateTraitement' => null));
+        foreach ($evenements as $evenement) {
+            try {
+                $this->eventManager->handle($evenement);
+            } catch (Exception $e) {
+                $this->logger->error($e->getMessage());
+            }
+        }
+    }
 
     private function doAction($method, $service, AbstractRequestType $request)
     {

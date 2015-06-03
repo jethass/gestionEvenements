@@ -1,3 +1,6 @@
+imports:
+    - { resource: doctrine.yml }
+
 services:
     omea_gestion_telco_evenements.services.evenements:
         class: Omea\GestionTelco\EvenementsBundle\Services\EvenementsService
@@ -5,9 +8,21 @@ services:
             - @validator
             - @logger
             - @omea_gestion_telco_evenements.services.saveevenement
+            - @omea_gestion_telco_evenements.eventmanager
+            - @omea_gestion_telco_evenements.evenement.repository
 
     omea_gestion_telco_evenements.services.saveevenement:
         class: Omea\GestionTelco\EvenementsBundle\Services\SaveEvenementService
         arguments:
             - @logger
             - @doctrine
+
+    # orchestrateur des événements
+    omea_gestion_telco_evenements.eventmanager:
+        class: Omea\GestionTelco\EvenementsBundle\EvenementManager\EvenementManager
+
+    # gestionnaires d'événements prenant en charge des codes événements
+    omea_gestion_telco_evenements.evenementmanager.handler.fairuse:
+        class: Omea\GestionTelco\EvenementsBundle\EvenementManager\Handler\FairUseHandler
+        tags:
+            - { name: omea_gestion_telco_evenements.eventmanager.handler }
