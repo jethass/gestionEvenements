@@ -1,5 +1,5 @@
 <?php
-namespace Omea\GestionTelco\EvenementsBundle\EventManager;
+namespace Omea\GestionTelco\EvenementsBundle\EvenementManager;
 
 use Omea\GestionTelco\EvenementsBundle\EvenementManager\Handler\EvenementHandlerInterface;
 use Omea\GestionTelco\EvenementsBundle\EvenementManager\EvenementInterface;

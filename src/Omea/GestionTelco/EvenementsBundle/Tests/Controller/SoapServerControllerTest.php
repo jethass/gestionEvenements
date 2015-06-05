@@ -4,7 +4,7 @@ namespace Omea\GestionTelco\EvenementsBundle\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class DefaultControllerTest extends WebTestCase
+class SoapServerControllerTest extends WebTestCase
 {
     public function testIndex()
     {

@@ -8,7 +8,7 @@ services:
             - @validator
             - @logger
             - @omea_gestion_telco_evenements.services.saveevenement
-            - @omea_gestion_telco_evenements.eventmanager
+            - @omea_gestion_telco_evenements.evenementmanager
             - @omea_gestion_telco_evenements.evenement.repository
 
     omea_gestion_telco_evenements.services.saveevenement:
@@ -18,11 +18,21 @@ services:
             - @doctrine
 
     # orchestrateur des événements
-    omea_gestion_telco_evenements.eventmanager:
+    omea_gestion_telco_evenements.evenementmanager:
         class: Omea\GestionTelco\EvenementsBundle\EvenementManager\EvenementManager
 
     # gestionnaires d'événements prenant en charge des codes événements
     omea_gestion_telco_evenements.evenementmanager.handler.fairuse:
         class: Omea\GestionTelco\EvenementsBundle\EvenementManager\Handler\FairUseHandler
         tags:
-            - { name: omea_gestion_telco_evenements.eventmanager.handler }
+            - { name: omea_gestion_telco_evenements.evenementmanager.handler }
+    
+    omea_gestion_telco_evenements.evenementmanager.handler.antifraude:
+        class: Omea\GestionTelco\EvenementsBundle\EvenementManager\Handler\AntiFraudeHandler
+        tags:
+            - { name: omea_gestion_telco_evenements.evenementmanager.handler }
+
+    omea_gestion_telco_evenements.evenementmanager.handler.changecountry:
+        class: Omea\GestionTelco\EvenementsBundle\EvenementManager\Handler\ChangeCountryHandler
+        tags:
+            - { name: omea_gestion_telco_evenements.evenementmanager.handler }

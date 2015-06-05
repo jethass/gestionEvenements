@@ -15,7 +15,7 @@ use Omea\GestionTelco\EvenementsBundle\Types\BaseResponse;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Omea\GestionTelco\EvenementsBundle\EventManager\EventManager;
+use Omea\GestionTelco\EvenementsBundle\EvenementManager\EvenementManager;
 use Omea\GestionTelco\EvenementsBundle\Entity\EvenementRepository;
 
 
@@ -40,7 +40,7 @@ class EvenementsService
     *
     * @var \Omea\GestionTelco\EvenementsBundle\Manager\Eventmanager
     */
-   private $eventManager;
+   private $evenementManager;
    
    /**
     *
@@ -52,14 +52,14 @@ class EvenementsService
         ValidatorInterface $validator,
         LoggerInterface $logger,
         SaveEvenementService $saveEvenementService,
-        EventManager $eventManager,
+        EvenementManager $evenementManager,
         EvenementRepository $evenementRepository
     )
     {
         $this->validator = $validator;
         $this->logger = $logger;
         $this->saveEvenementService = $saveEvenementService;
-        $this->eventManager = $eventManager;
+        $this->evenementManager = $evenementManager;
         $this->evenementRepository = $evenementRepository;
     }
 
@@ -87,7 +87,7 @@ class EvenementsService
         $evenements = $this->evenementRepository->findBy(array('dateTraitement' => null));
         foreach ($evenements as $evenement) {
             try {
-                $this->eventManager->handle($evenement);
+                $this->evenementManager->handle($evenement);
             } catch (Exception $e) {
                 $this->logger->error($e->getMessage());
             }
@@ -131,18 +131,6 @@ class EvenementsService
     private function validate($request)
     {
         $this->logger->debug(sprintf('Validating %s', get_class($request)));
-        
-        /*if (!preg_match('/\b((\d){10})\b/', $request->msisdn, $matches)) {
-           throw new InvalidArgumentException('The MSISDN must be composed by 10 digits');
-           
-        }
-        
-        if (!preg_match('/[a-zA-Z]/', $request->code, $matches)) {
-           throw new InvalidArgumentException('The CODE must be composed by 10 caracters');
-           
-        }*/
-        
-        
         $errorList = $this->validator->validate($request);
 
         if (count($errorList) > 0) {
