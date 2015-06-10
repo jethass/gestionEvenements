@@ -1,6 +1,7 @@
 services:
     omea_gestion_telco_evenements.evenement.repository:
-        factory_service: 'doctrine.orm.main_entity_manager'
+        #factory_service: 'doctrine.orm.main_entity_manager'
+        factory_service: 'doctrine.orm.default_entity_manager'
         factory_method: 'getRepository'
         class: 'Doctrine\ORM\EntityRepository'
-        arguments: ['Omea\GestionTelco\EvenementsBundle:Evenement']
+        arguments: ['OmeaGestionTelcoEvenementsBundle:Evenement']

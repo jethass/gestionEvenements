@@ -25,7 +25,7 @@ class Evenement implements EvenementInterface
     /**
      * @var integer
      *
-     * @ORM\Column(name="msisdn", type="integer")
+     * @ORM\Column(name="msisdn", type="integer", columnDefinition="INT(10) UNSIGNED ZEROFILL")
      */
     private $msisdn;
 
@@ -53,14 +53,14 @@ class Evenement implements EvenementInterface
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="dateTraitement", type="date")
+     * @ORM\Column(name="dateTraitement", type="date", nullable=true)
      */
     private $dateTraitement;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="codeRetour", type="string", length=15)
+     * @ORM\Column(name="codeRetour", type="string", length=15, nullable=true)
      */
     private $codeRetour;
 
@@ -154,7 +154,7 @@ class Evenement implements EvenementInterface
      *
      * @return Evenement
      */
-    public function setDateAppel($dateAppel)
+    public function setDateAppel(\DateTime $dateAppel)
     {
         $this->dateAppel = $dateAppel;
 
@@ -178,7 +178,7 @@ class Evenement implements EvenementInterface
      *
      * @return Evenement
      */
-    public function setDateTraitement($dateTraitement)
+    public function setDateTraitement(\DateTime $dateTraitement)
     {
         $this->dateTraitement = $dateTraitement;
 

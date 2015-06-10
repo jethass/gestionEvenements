@@ -14,17 +14,35 @@ use Omea\GestionTelco\EvenementsBundle\Exception\TechnicalException;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Omea\GestionTelco\EvenementsBundle\Entity\Evenement;
 
-class SaveEvenementService extends AbstractService
-{
-   
 
+class SaveEvenementService
+{
+  
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
+     * @var EntityManager
+     */
+    protected $em;
+
+    /**
+     * @var EntityManager
+     */
+    protected $emMain;
+    
+   
     /**
      * @param LoggerInterface $logger
      * @param RegistryInterface $doctrine
      */
     public function __construct(LoggerInterface $logger, RegistryInterface $doctrine)
     {
-        parent::__construct($logger, $doctrine);
+        $this->logger = $logger;
+        $this->em = $doctrine->getManager();
+        //$this->emMain = $doctrine->getManager('main');
     }
 
     /**
