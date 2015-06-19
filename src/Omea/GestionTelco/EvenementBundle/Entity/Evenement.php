@@ -1,33 +1,26 @@
 <?php
 
-namespace Omea\GestionTelco\EvenementsBundle\Entity;
+namespace Omea\GestionTelco\EvenementBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Omea\GestionTelco\EvenementsBundle\EvenementManager\EvenementInterface;
+use Omea\GestionTelco\EvenementBundle\EvenementManager\Interfaces\EvenementInterface;
 
 /**
- * Evenement
+ * Evenements
  *
- * @ORM\Table()
- * @ORM\Entity(repositoryClass="Omea\GestionTelco\EvenementsBundle\Entity\EvenementRepository")
+ * @ORM\Table("EVENEMENTS")
+ * @ORM\Entity(repositoryClass="Omea\GestionTelco\EvenementBundle\Entity\EvenementRepository")
  */
 class Evenement implements EvenementInterface
 {
     /**
      * @var integer
      *
-     * @ORM\Column(name="id", type="integer")
+     * @ORM\Column(name="ID_EVENEMENT", type="integer", nullable=false)
      * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\GeneratedValue(strategy="IDENTITY")
      */
-    private $id;
-
-    /**
-     * @var integer
-     *
-     * @ORM\Column(name="msisdn", type="integer")
-     */
-    private $msisdn;
+    private $idEvenement;
 
     /**
      * @var string
@@ -39,72 +32,47 @@ class Evenement implements EvenementInterface
     /**
      * @var string
      *
-     * @ORM\Column(name="type", type="string", length=25)
+     * @ORM\Column(name="type", type="string", length=45)
      */
     private $type;
 
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="dateAppel", type="date")
+     * @ORM\Column(name="date_appel", type="datetime", nullable=true)
      */
     private $dateAppel;
 
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="dateTraitement", type="date")
+     * @ORM\Column(name="date_traitement", type="datetime", nullable=true)
      */
     private $dateTraitement;
 
     /**
-     * @var string
+     * @var integer
      *
-     * @ORM\Column(name="codeRetour", type="string", length=15)
+     * @ORM\Column(name="msisdn", type="integer", columnDefinition="INT(10) UNSIGNED ZEROFILL")
      */
-    private $codeRetour;
+    private $msisdn;
 
 
     /**
      * Get id
      *
-     * @return integer
+     * @return integer 
      */
-    public function getId()
+    public function getIdEvenement()
     {
-        return $this->id;
-    }
-
-    /**
-     * Set msisdn
-     *
-     * @param integer $msisdn
-     *
-     * @return Evenement
-     */
-    public function setMsisdn($msisdn)
-    {
-        $this->msisdn = $msisdn;
-
-        return $this;
-    }
-
-    /**
-     * Get msisdn
-     *
-     * @return integer
-     */
-    public function getMsisdn()
-    {
-        return $this->msisdn;
+        return $this->idEvenement;
     }
 
     /**
      * Set code
      *
      * @param string $code
-     *
-     * @return Evenement
+     * @return Evenements
      */
     public function setCode($code)
     {
@@ -116,7 +84,7 @@ class Evenement implements EvenementInterface
     /**
      * Get code
      *
-     * @return string
+     * @return string 
      */
     public function getCode()
     {
@@ -127,8 +95,7 @@ class Evenement implements EvenementInterface
      * Set type
      *
      * @param string $type
-     *
-     * @return Evenement
+     * @return Evenements
      */
     public function setType($type)
     {
@@ -140,7 +107,7 @@ class Evenement implements EvenementInterface
     /**
      * Get type
      *
-     * @return string
+     * @return string 
      */
     public function getType()
     {
@@ -151,10 +118,9 @@ class Evenement implements EvenementInterface
      * Set dateAppel
      *
      * @param \DateTime $dateAppel
-     *
-     * @return Evenement
+     * @return Evenements
      */
-    public function setDateAppel($dateAppel)
+    public function setDateAppel(\DateTime $dateAppel)
     {
         $this->dateAppel = $dateAppel;
 
@@ -164,7 +130,7 @@ class Evenement implements EvenementInterface
     /**
      * Get dateAppel
      *
-     * @return \DateTime
+     * @return \DateTime 
      */
     public function getDateAppel()
     {
@@ -175,10 +141,9 @@ class Evenement implements EvenementInterface
      * Set dateTraitement
      *
      * @param \DateTime $dateTraitement
-     *
-     * @return Evenement
+     * @return Evenements
      */
-    public function setDateTraitement($dateTraitement)
+    public function setDateTraitement(\DateTime $dateTraitement)
     {
         $this->dateTraitement = $dateTraitement;
 
@@ -188,7 +153,7 @@ class Evenement implements EvenementInterface
     /**
      * Get dateTraitement
      *
-     * @return \DateTime
+     * @return \DateTime 
      */
     public function getDateTraitement()
     {
@@ -196,27 +161,25 @@ class Evenement implements EvenementInterface
     }
 
     /**
-     * Set codeRetour
+     * Set msisdn
      *
-     * @param string $codeRetour
-     *
-     * @return Evenement
+     * @param integer $msisdn
+     * @return Evenements
      */
-    public function setCodeRetour($codeRetour)
+    public function setMsisdn($msisdn)
     {
-        $this->codeRetour = $codeRetour;
+        $this->msisdn = $msisdn;
 
         return $this;
     }
 
     /**
-     * Get codeRetour
+     * Get msisdn
      *
-     * @return string
+     * @return integer 
      */
-    public function getCodeRetour()
+    public function getMsisdn()
     {
-        return $this->codeRetour;
+        return $this->msisdn;
     }
 }
-

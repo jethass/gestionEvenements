@@ -1,0 +1,15 @@
+services:
+
+    # orchestrateur des événements
+    omea_gestion_telco_Evenement.actesmanager:
+        class: Omea\GestionTelco\EvenementBundle\ActeManager\ActesManager
+
+    omea_gestion_telco_Evenement.services.Evenements:
+        class: Omea\GestionTelco\EvenementBundle\Services\EvenementService
+        arguments:
+            - @validator
+            - @logger
+            - @doctrine
+            - @omea_gestion_telco_Evenement.evenement.repository
+            - @omea_gestion_telco_Evenement.actesmanager
+
