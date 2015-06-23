@@ -165,16 +165,6 @@ class EvenementService
 
     public function handleEvenements()
     {
-        $acteDefinitionRepository = new InMemoryActeDefinitionRepository(array(
-            '0'=>array( new ActeDefinition('sms', 'code=1'),new ActeDefinition('histo') )
-        ));
-        
-        $actesManager = new ActesManager(new ActeOptionsSerializer(), $acteDefinitionRepository);
-        $actesManager->registerActe('sms', 'SMSActe');
-        $actesManager->registerActe('histo', 'HistoActe');
-       
-        
-        
         $evenements = $this->evenementRepository->findBy(array('dateTraitement' => null));
         foreach ($evenements as $key => $evenement) {
             try

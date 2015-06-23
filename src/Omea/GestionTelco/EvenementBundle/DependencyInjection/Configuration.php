@@ -20,6 +20,24 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('omea_gestion_telco_Evenement');
 
+        $rootNode
+            ->children()
+                ->arrayNode('acte_histo_config')
+                    ->isRequired()
+                        ->children()
+                            ->scalarNode('id_conseiller')->isRequired()->end()
+                        ->end()
+                    ->end()
+                ->end()
+                ->arrayNode('sms_config')
+                    ->isRequired()
+                        ->children()
+                            ->scalarNode('id_template')->isRequired()->end()
+                        ->end()
+                    ->end()
+                ->end()
+            ->end();
+
         // Here you should define the parameters that are allowed to
         // configure your bundle. See the documentation linked above for
         // more information on that topic.

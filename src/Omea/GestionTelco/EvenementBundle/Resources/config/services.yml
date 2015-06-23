@@ -10,6 +10,23 @@ services:
             - @validator
             - @logger
             - @doctrine
-            - @omea_gestion_telco_Evenement.evenement.repository
+#            - @omea_gestion_telco_Evenement.evenement.repository
             - @omea_gestion_telco_Evenement.actesmanager
-
+    
+    omea_gestion_telco_Evenement.acte.histo:
+        class: Omea\GestionTelco\EvenementBundle\ActeManager\HistoActe
+        arguments:
+            - @logger
+            - @doctrine
+            - @soap.client
+            - %omea_gestion_telco_Evenement.acte_histo_config%
+            - %webservices.posehisto%
+            
+    omea_gestion_telco_Evenement.acte.sms:
+        class: Omea\GestionTelco\EvenementBundle\ActeManager\SMSActe
+        arguments:
+            - @logger
+            - @doctrine
+            - @soap.client
+            - %omea_gestion_telco_Evenement.sms_config%
+            - %webservices.envoi_sms%

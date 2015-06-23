@@ -24,5 +24,8 @@ class OmeaGestionTelcoEvenementExtension extends Extension
         
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
+        
+        $container->setParameter('omea_gestion_telco_Evenement.acte_histo_config', $config['acte_histo_config']);
+        $container->setParameter('omea_gestion_telco_Evenement.sms_config', $config['sms_config']);
     }
 }
