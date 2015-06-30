@@ -1,7 +1,0 @@
-omea_gestion_telco_pates_soap_server:
-    pattern: /
-    defaults: { _controller: 'OmeaGestionTelcoPatesBundle:SoapServer:soap' }
-
-omea_gestion_telco_pates_soap_server_wsdl:
-    pattern:  /wsdl
-    defaults: { _controller: 'OmeaGestionTelcoPatesBundle:SoapServer:wsdl' }

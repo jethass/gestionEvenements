@@ -18,21 +18,28 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('omea_gestion_telco_Evenement');
+        $rootNode = $treeBuilder->root('omea_gestion_telco_evenement');
 
         $rootNode
             ->children()
                 ->arrayNode('acte_histo_config')
                     ->isRequired()
                         ->children()
-                            ->scalarNode('id_conseiller')->isRequired()->end()
+                            ->scalarNode('id_conseiller')->isRequired()
                         ->end()
                     ->end()
                 ->end()
                 ->arrayNode('sms_config')
                     ->isRequired()
                         ->children()
-                            ->scalarNode('id_template')->isRequired()->end()
+                            ->scalarNode('id_template')->isRequired()
+                        ->end()
+                    ->end()
+                ->end()
+                ->arrayNode('bridge_config')
+                    ->isRequired()
+                        ->children()
+                            ->scalarNode('param1')->isRequired()
                         ->end()
                     ->end()
                 ->end()

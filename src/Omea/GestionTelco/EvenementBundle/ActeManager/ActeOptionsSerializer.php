@@ -7,7 +7,7 @@
  */
 
 namespace Omea\GestionTelco\EvenementBundle\ActeManager;
-use Omea\GestionTelco\EvenementBundle\ActeManager\Interfaces\ActeOptionsInterface;
+use Omea\GestionTelco\EvenementBundle\ActeManager\ActeOptionsInterface;
 /**
  * Classe de sérialisation et de désérialisation pour les options des actes
  */

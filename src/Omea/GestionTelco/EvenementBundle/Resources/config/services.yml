@@ -1,32 +1,53 @@
 services:
 
     # orchestrateur des événements
-    omea_gestion_telco_Evenement.actesmanager:
-        class: Omea\GestionTelco\EvenementBundle\ActeManager\ActesManager
+    omea_gestion_telco_evenement.actedefinition.repository:
+        class: Omea\GestionTelco\EvenementBundle\Entity\ActeDefinitionRepository
 
-    omea_gestion_telco_Evenement.services.Evenements:
+    omea_gestion_telco_evenement.acteoptionserializer:
+        class: Omea\GestionTelco\EvenementBundle\ActeManager\ActeOptionsSerializer
+        
+    omea_gestion_telco_evenement.actesmanager:
+        class: Omea\GestionTelco\EvenementBundle\ActeManager\ActesManager
+        arguments:
+            - @omea_gestion_telco_evenement.acteoptionserializer
+            - @omea_gestion_telco_evenement.actedefinition.repository
+
+    omea_gestion_telco_evenement.actesmanagerservice:
+        class: Omea\GestionTelco\EvenementBundle\Services\ActesManagerService
+        arguments:
+            - @logger
+            - @doctrine
+            - @soap.client
+
+    omea_gestion_telco_evenement.services.evenements:
         class: Omea\GestionTelco\EvenementBundle\Services\EvenementService
         arguments:
             - @validator
             - @logger
             - @doctrine
-#            - @omea_gestion_telco_Evenement.evenement.repository
-            - @omea_gestion_telco_Evenement.actesmanager
+            - @omea_gestion_telco_evenements.evenement.repository
+            - @omea_gestion_telco_evenement.actesmanager
+            - @omea_gestion_telco_evenement.actesmanagerservice
     
-    omea_gestion_telco_Evenement.acte.histo:
-        class: Omea\GestionTelco\EvenementBundle\ActeManager\HistoActe
+    omea_gestion_telco_evenement.acte.histo:
+        class: Omea\GestionTelco\EvenementBundle\ActeManager\Actes\HistoActe
         arguments:
-            - @logger
-            - @doctrine
-            - @soap.client
-            - %omea_gestion_telco_Evenement.acte_histo_config%
+            - %omea_gestion_telco_evenement.acte_histo_config%
             - %webservices.posehisto%
-            
-    omea_gestion_telco_Evenement.acte.sms:
-        class: Omea\GestionTelco\EvenementBundle\ActeManager\SMSActe
+            - @omea_gestion_telco_evenement.actesmanagerservice
+
+    omea_gestion_telco_evenement.acte.sms:
+        class: Omea\GestionTelco\EvenementBundle\ActeManager\Actes\SMSActe
         arguments:
-            - @logger
-            - @doctrine
-            - @soap.client
-            - %omea_gestion_telco_Evenement.sms_config%
+            - %omea_gestion_telco_evenement.sms_config%
             - %webservices.envoi_sms%
+            - %webservices.eligibilityPassEurope%
+            - @omea_gestion_telco_evenement.actesmanagerservice
+    
+    omea_gestion_telco_evenement.acte.bridage:
+        class: Omea\GestionTelco\EvenementBundle\ActeManager\Actes\BridageActe
+        arguments:
+            - %omea_gestion_telco_evenement.bridge_config%
+            - %webservices.addbridage%
+            - @omea_gestion_telco_evenement.actesmanagerservice

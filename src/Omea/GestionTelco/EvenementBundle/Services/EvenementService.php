@@ -19,6 +19,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
 use Omea\GestionTelco\EvenementBundle\Entity\Evenement;
 use Omea\GestionTelco\EvenementBundle\Entity\EvenementRepository;
 use Omea\GestionTelco\EvenementBundle\Entity\ActeDefinition;
+use Omea\GestionTelco\EvenementBundle\Entity\GestionEvenementErreur;
 
 use Omea\GestionTelco\EvenementBundle\Tests\Stubs\InMeMoryActeDefinitionRepository;
 
@@ -56,11 +57,18 @@ class EvenementService
      */
     private $actesManager;
 
+    /**
+     *
+     * @var \Omea\GestionTelco\EvenementBundle\Services\ActesManagerService
+     */
+    private $actesManagerService;
+
     public function __construct(ValidatorInterface $validator,
                                 LoggerInterface $logger,
                                 RegistryInterface $doctrine,
                                 EvenementRepository $evenementRepository,
-                                ActesManager $actesManager)
+                                ActesManager $actesManager,
+                                ActesManagerService $actesManagerService)
     {
         $this->validator = $validator;
         $this->logger = $logger;
@@ -68,6 +76,7 @@ class EvenementService
         //$this->emMain = $doctrine->getManager('main');
         $this->evenementRepository = $evenementRepository;
         $this->actesManager = $actesManager;
+        $this->actesManagerService = $actesManagerService;
     }
 
     /**
@@ -83,10 +92,7 @@ class EvenementService
             $response = $this->saveAction($request);
             $logLvl = 'info';
 
-        } catch (AccessDeniedException $e) {
-            $logLvl = 'warning';
-            $response = new BaseResponse($e->getCode(), $e->getMessage());
-        } catch (NotFoundException $e) {
+       } catch (NotFoundException $e) {
             $logLvl = 'warning';
             $response = new BaseResponse($e->getCode(), $e->getMessage());
         } catch (InvalidArgumentException $e) {
@@ -99,11 +105,10 @@ class EvenementService
 
         $this->logger->$logLvl(sprintf('Save Evenement end with response: %s', print_r($response, true)));
 
-        if (!$response instanceof BaseResponse) {
-            $response = new SaveEvenementResponse(0, '', $response);
-        } else {
-            $response = new SaveEvenementResponse($response->responseCode, $response->message, false);
-        }
+//        if ($response->responseCode != 0){
+//            $response = new SaveEvenementResponse($e->getCode(), $e->getMessage(), false);
+//        }
+            
 
         return $response;
     }
@@ -152,27 +157,31 @@ class EvenementService
                 $this->em->flush();
 
                 $this->em->getConnection()->commit();
-
-                return "Inserted OK";
-
+                return new SaveEvenementResponse('0', 'Inserted OK',false);
+                
             } catch (Exception $e) {
                 $this->em->getConnection()->rollback();
                 $this->em->close();
-                throw $e;
+                
+                return new SaveEvenementResponse($e->getCode(),'Inserted KO',$e->getMessage());
             }
         }
     }
 
     public function handleEvenements()
     {
-        $evenements = $this->evenementRepository->findBy(array('dateTraitement' => null));
+        $evenements = $this->evenementRepository->findBy(array('dateTraitement' => null,'type'=>'Notification'));
         foreach ($evenements as $key => $evenement) {
             try
             {
-                $actesManager->handle($evenement);
+                $this->actesManager->registerActe('sms', 'SMSActe');
+                $this->actesManager->registerActe('histo', 'HistoActe');
+                $this->actesManager->registerActe('bridage', 'BridageActe');
+                $this->actesManager->handle($evenement);
             }
             catch (Exception $e)
             {
+                $this->actesManagerService->traceActeError($evenement->getIdEvenement(), null ,$e->getMessage());
                 $this->logger->error("Erreur lors de la gestion de l'évènement '".$evenement->getCode()."': ".$e->getMessage()."");
             }
         }

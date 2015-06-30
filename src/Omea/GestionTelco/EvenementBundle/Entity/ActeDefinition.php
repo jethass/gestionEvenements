@@ -126,21 +126,4 @@ class ActeDefinition implements ActeDefinitionInterface
         return $this->evenementDefinition;
     }
 
-    /**
-     * Nom de l'option
-     * @return [type] [description]
-     */
-    public function getName()
-    {
-        // TODO: Implement getName() method.
-    }
-
-    /**
-     * Options de l'acte s�rialis�
-     * @return string
-     */
-    public function getOptions()
-    {
-        // TODO: Implement getOptions() method.
-    }
 }

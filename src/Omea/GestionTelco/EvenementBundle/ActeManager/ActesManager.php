@@ -8,13 +8,15 @@
 
 namespace Omea\GestionTelco\EvenementBundle\ActeManager;
 
-use Omea\GestionTelco\EvenementBundle\EvenementManager\Interfaces\EvenementInterface;
+use Omea\GestionTelco\EvenementBundle\ActeManager\EvenementActesProviderInterface;
+use Omea\GestionTelco\EvenementBundle\ActeManager\EvenementInterface;
 use Omea\GestionTelco\EvenementBundle\ActeManager\ActeOptionsSerializer;
-use Omea\GestionTelco\EvenementBundle\Entity\ActeDefinitionRepository;
-use Omea\GestionTelco\EvenementBundle\ActeManager\Interfaces\ActeDefinitionInterface;
-use Omea\GestionTelco\EvenementBundle\ActeManager\Interfaces\ActeInterface;
-use Omea\GestionTelco\EvenementBundle\ActeManager\Interfaces\ConfigurableActeInterface;
-
+use Omea\GestionTelco\EvenementBundle\ActeManager\ActeDefinitionInterface;
+use Omea\GestionTelco\EvenementBundle\ActeManager\ActeInterface;
+use Omea\GestionTelco\EvenementBundle\ActeManager\ConfigurableActeInterface;
+use Omea\GestionTelco\EvenementBundle\ActeManager\Actes\SMSActe;
+use Omea\GestionTelco\EvenementBundle\ActeManager\Actes\HistoActe;
+use Omea\GestionTelco\EvenementBundle\ActeManager\Actes\BridageActe;
 
 /**
  * Gestionnaire d'actes
@@ -23,16 +25,16 @@ class ActesManager
 {
     private $actes;
 
-    private $acteDefinitionRepository;
+    private $evenementActesProvider;
 
     private $serializer;
 
     public function __construct(
         ActeOptionsSerializer $serializer,
-        ActeDefinitionRepository $acteDefinitionRepository
+        EvenementActesProviderInterface $evenementActesProvider
     ) {
         $this->serializer = $serializer;
-        $this->acteDefinitionRepository = $acteDefinitionRepository;
+        $this->evenementActesProvider = $evenementActesProvider;
     }
 
     /**
@@ -43,7 +45,7 @@ class ActesManager
      */
     public function handle(EvenementInterface $evenement)
     {
-        $actesDefinitions = $this->acteDefinitionRepository->findActesByCodeEvenement($evenement->getCode());
+        $actesDefinitions = $this->evenementActesProvider->findActesByEvenementId($evenement->getId());
 
         if (empty($actesDefinition)) {
             throw new \RuntimeException("Aucun acte n'est capable de prendre en charge le code evenement " . $evenement->getCode());
@@ -51,7 +53,7 @@ class ActesManager
 
         foreach ($actesDefinitions as $acteDefinition) {
             $acte = $this->getActe($acteDefinition);
-            $acte->handle($evenement);
+            $acte->handle($evenement,$acte->getIdActe());
         }
     }
 
