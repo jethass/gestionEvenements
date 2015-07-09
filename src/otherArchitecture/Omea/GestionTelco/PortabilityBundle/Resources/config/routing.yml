@@ -1,0 +1,3 @@
+omea_gestion_telco_portability_homepage:
+    path:     /hello/{name}
+    defaults: { _controller: OmeaGestionTelcoPortabilityBundle:Default:index }

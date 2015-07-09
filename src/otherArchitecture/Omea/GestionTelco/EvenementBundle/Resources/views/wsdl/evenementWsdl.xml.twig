@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" 
+             xmlns:tns="{{url_soap_action}}" 
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+             xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" 
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+             xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/" 
+             xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+             name="wsGestionTelcoEvenement" 
+             targetNamespace="{{url_soap_action}}">
+    <types>
+        <xsd:schema targetNamespace="{{url_soap_action}}">
+            <xsd:complexType name="SaveEvenementRequest">
+                <xsd:all>
+                    <xsd:element name="msisdn" type="xsd:string" nillable="true"/>
+                    <xsd:element name="code" type="xsd:string" nillable="true"/>
+                    <xsd:element name="type" type="xsd:string" nillable="true"/>
+                </xsd:all>
+            </xsd:complexType>
+            <xsd:element name="saveEvenement">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="request" type="tns:SaveEvenementRequest"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:complexType name="SaveEvenementResponse">
+                <xsd:all>
+                    <xsd:element name="codeRetour" type="xsd:string"/>
+                    <xsd:element name="responseCode" type="xsd:int"/>
+                    <xsd:element name="message" type="xsd:string"/>
+                </xsd:all>
+            </xsd:complexType>
+            <xsd:element name="saveEvenementResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="saveEvenementResult" type="tns:SaveEvenementResponse"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </types>
+    <portType name="wsGestionTelcoEvenementPort">
+        <operation name="saveEvenement">
+            <documentation>saveEvenement</documentation>
+            <input message="tns:saveEvenementIn"/>
+            <output message="tns:saveEvenementOut"/>
+        </operation>
+    </portType>
+    <binding name="wsGestionTelcoEvenementBinding" type="tns:wsGestionTelcoEvenementPort">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="saveEvenement">
+            <soap:operation soapAction="{{url_soap_action}}#saveEvenement"/>
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+    </binding>
+    <service name="wsGestionTelcoEvenementService">
+        <port name="wsGestionTelcoEvenementPort" binding="tns:wsGestionTelcoEvenementBinding">
+            <soap:address location="{{url_soap_action}}"/>
+        </port>
+    </service>
+    <message name="saveEvenementIn">
+        <part name="parameters" element="tns:saveEvenement"/>
+    </message>
+    <message name="saveEvenementOut">
+        <part name="parameters" element="tns:saveEvenementResponse"/>
+    </message>
+</definitions>

@@ -1,0 +1,192 @@
+services:
+    omea_gestion_telco_portability.services.messagequeue:
+        class: Omea\GestionTelco\PortabilityBundle\Services\MessageQueueService
+        arguments:
+            - @logger
+            - %omea_gestion_telco_portability.config%
+        tags:
+            - { name: monolog.logger, channel: queues }
+    # Queues
+    omea_gestion_telco_portability.services.queues.generic:
+        abstract: true
+        arguments:
+            - @logger
+            - %omea_gestion_telco_portability.config%
+            - @omea_gestion_telco_portability.services.messaging
+            - @doctrine.dbal.main_connection
+    omea_gestion_telco_portability.services.queues.receive:
+        class: Omea\GestionTelco\PortabilityBundle\Services\Queues\MessageReceptionQueue
+        parent: omea_gestion_telco_portability.services.queues.generic
+        arguments:
+            - @doctrine.dbal.pnm_ppnm_connection
+            - @omea_gestion_telco_portability.services.external.sfr_pnm
+        tags:
+            - { name: monolog.logger, channel: message_reception }
+            - { name: omea_gestion_telco_portability.queues, id: receive }
+    omea_gestion_telco_portability.services.queues.send:
+        class: Omea\GestionTelco\PortabilityBundle\Services\Queues\MessageEmissionQueue
+        parent: omea_gestion_telco_portability.services.queues.generic
+        arguments:
+            - @doctrine.dbal.pnm_ppnm_connection
+        tags:
+            - { name: monolog.logger, channel: message_emission }
+            - { name: omea_gestion_telco_portability.queues, id: send }
+    omea_gestion_telco_portability.services.queues.eligPE:
+        class: Omea\GestionTelco\PortabilityBundle\Services\Queues\IncomingPortabilityEligibilityQueue
+        parent: omea_gestion_telco_portability.services.queues.generic
+        arguments:
+            - @omea_gestion_telco_portability.services.date
+            - @omea_gestion_telco_portability.services.incoming_portability_creation
+            - @omea_gestion_telco_portability.services.external.sfr_pnm
+        tags:
+            - { name: monolog.logger, channel: eligPE }
+            - { name: omea_gestion_telco_portability.queues, id: eligPE }
+    omea_gestion_telco_portability.services.queues.activPE:
+        class: Omea\GestionTelco\PortabilityBundle\Services\Queues\IncomingPortabilityActivationQueue
+        parent: omea_gestion_telco_portability.services.queues.generic
+        arguments:
+            - @omea_gestion_telco_portability.services.date
+            - @omea_gestion_telco_portability.services.external.provisioning
+        tags:
+            - { name: monolog.logger, channel: activPE }
+            - { name: omea_gestion_telco_portability.queues, id: activPE }
+    omea_gestion_telco_portability.services.queues.abandonPE:
+        class: Omea\GestionTelco\PortabilityBundle\Services\Queues\AbandonnedIncomingPortabilityActivationQueue
+        parent: omea_gestion_telco_portability.services.queues.generic
+        arguments:
+            - @omea_gestion_telco_portability.services.date
+            - @omea_gestion_telco_portability.services.external.provisioning
+            - @omea_gestion_telco_portability.services.external.email
+        tags:
+            - { name: monolog.logger, channel: abandonPE }
+            - { name: omea_gestion_telco_portability.queues, id: abandonPE }
+    omea_gestion_telco_portability.services.queues.eligPS:
+        class: Omea\GestionTelco\PortabilityBundle\Services\Queues\OutgoingPortabilityEligibilityQueue
+        parent: omea_gestion_telco_portability.services.queues.generic
+        arguments:
+            - @omea_gestion_telco_portability.services.date
+        tags:
+            - { name: monolog.logger, channel: eligPS }
+            - { name: omea_gestion_telco_portability.queues, id: eligPS }
+    omea_gestion_telco_portability.services.queues.resilPS:
+        class: Omea\GestionTelco\PortabilityBundle\Services\Queues\OutgoingPortabilityResiliationQueue
+        parent: omea_gestion_telco_portability.services.queues.generic
+        arguments:
+            - @omea_gestion_telco_portability.services.date
+            - @omea_gestion_telco_portability.services.external.provisioning
+            - @omea_gestion_telco_portability.services.external.billing
+            - @omea_gestion_telco_portability.services.external.mobile_option
+        tags:
+            - { name: monolog.logger, channel: resilPS }
+            - { name: omea_gestion_telco_portability.queues, id: resilPS }
+    # Internal services
+    omea_gestion_telco_portability.services.messaging:
+        class: Omea\GestionTelco\PortabilityBundle\Services\MessagingService
+        arguments:
+            - @logger
+            - @doctrine.dbal.main_connection
+            - @doctrine.dbal.pnm_ppnm_connection
+            - %omea_gestion_telco_portability.config%
+        tags:
+            - { name: monolog.logger, channel: messaging }
+    omea_gestion_telco_portability.services.date:
+        class: Omea\GestionTelco\PortabilityBundle\Services\DateService
+        arguments:
+            - @logger
+            - @doctrine.dbal.main_connection
+            - %omea_gestion_telco_portability.config%
+        tags:
+            - { name: monolog.logger, channel: dates }
+    omea_gestion_telco_portability.services.incoming_portability_creation:
+        class: Omea\GestionTelco\PortabilityBundle\Services\IncomingPortabilityCreationService
+        arguments:
+            - @logger
+            - %omea_gestion_telco_portability.config%
+            - @omea_gestion_telco_portability.services.messaging
+            - @doctrine.dbal.main_connection
+        tags:
+            - { name: monolog.logger, channel: creationPE }
+    # External services
+    omea_gestion_telco_portability.services.external.billing: "@omea_gestion_telco_portability.services.external.billing.proxy"
+    omea_gestion_telco_portability.services.external.email: "@omea_gestion_telco_portability.services.external.email.proxy"
+    omea_gestion_telco_portability.services.external.mobile_option: "@omea_gestion_telco_portability.services.external.mobile_option.proxy"
+    omea_gestion_telco_portability.services.external.provisioning: "@omea_gestion_telco_portability.services.external.provisioning.stub"
+    omea_gestion_telco_portability.services.external.sfr_pnm: "@omea_gestion_telco_portability.services.external.sfr_pnm.stub"
+    # Proxies to external services
+    omea_gestion_telco_portability.services.external.generic_proxy:
+        abstract: true
+        arguments:
+            - @logger
+            - %omea_gestion_telco_portability.config%
+            - @soap.client
+    omea_gestion_telco_portability.services.external.provisioning.proxy:
+        class: Omea\GestionTelco\PortabilityBundle\Services\External\Provisioning\ProvisioningProxyService
+        parent: omea_gestion_telco_portability.services.external.generic_proxy
+        arguments:
+            - %webservices.provisioning%
+        tags:
+            - { name: monolog.logger, channel: provisioning_proxy }
+    omea_gestion_telco_portability.services.external.sfr_pnm.proxy:
+        class: Omea\GestionTelco\PortabilityBundle\Services\External\SfrPnm\SfrPnmProxyService
+        parent: omea_gestion_telco_portability.services.external.generic_proxy
+        arguments:
+            - %webservices.relais_omg%
+        tags:
+            - { name: monolog.logger, channel: sfr_pnm_proxy }
+    omea_gestion_telco_portability.services.external.billing.proxy:
+        class: Omea\GestionTelco\PortabilityBundle\Services\External\Billing\BillingProxyService
+        parent: omea_gestion_telco_portability.services.external.generic_proxy
+        arguments:
+            - %webservices.zsmart%
+        tags:
+            - { name: monolog.logger, channel: billing_proxy }
+    omea_gestion_telco_portability.services.external.mobile_option.proxy:
+        class: Omea\GestionTelco\PortabilityBundle\Services\External\MobileOption\MobileOptionProxyService
+        parent: omea_gestion_telco_portability.services.external.generic_proxy
+        arguments:
+            - %webservices.gestionPenaliteMobile%
+        tags:
+            - { name: monolog.logger, channel: mobile_option_proxy }
+    omea_gestion_telco_portability.services.external.email.proxy:
+        class: Omea\GestionTelco\PortabilityBundle\Services\External\Email\EmailProxyService
+        parent: omea_gestion_telco_portability.services.external.generic_proxy
+        arguments:
+            - %webservices.gestioncommunication%
+        tags:
+            - { name: monolog.logger, channel: email_proxy }
+    # Stubs to external services
+    omea_gestion_telco_portability.services.external.provisioning.stub:
+        class: Omea\GestionTelco\PortabilityBundle\Services\External\Provisioning\ProvisioningStubService
+        arguments: [@logger, %omea_gestion_telco_portability.config% ]
+        tags:
+            - { name: monolog.logger, channel: provisioning_stub }
+    omea_gestion_telco_portability.services.external.sfr_pnm.stub:
+        class: Omea\GestionTelco\PortabilityBundle\Services\External\SfrPnm\SfrPnmStubService
+        arguments: [@logger, %omea_gestion_telco_portability.config% ]
+        tags:
+            - { name: monolog.logger, channel: sfr_pnm_stub }
+    omea_gestion_telco_portability.services.external.billing.stub:
+        class: Omea\GestionTelco\PortabilityBundle\Services\External\Billing\BillingStubService
+        arguments: [@logger, %omea_gestion_telco_portability.config% ]
+        tags:
+            - { name: monolog.logger, channel: billing_stub }
+    omea_gestion_telco_portability.services.external.mobile_option.stub:
+        class: Omea\GestionTelco\PortabilityBundle\Services\External\MobileOption\MobileOptionStubService
+        arguments: [@logger, %omea_gestion_telco_portability.config% ]
+        tags:
+            - { name: monolog.logger, channel: mobile_option_stub }
+    omea_gestion_telco_portability.services.external.email.stub:
+        class: Omea\GestionTelco\PortabilityBundle\Services\External\Email\EmailStubService
+        arguments: [@logger, %omea_gestion_telco_portability.config% ]
+        tags:
+            - { name: monolog.logger, channel: email_stub }
+    # Test services
+    omea_gestion_telco_portability.services.egp_simulator:
+        class: Omea\GestionTelco\PortabilityBundle\Services\EgpSimulatorService
+        arguments:
+            - @logger
+            - %omea_gestion_telco_portability.config%
+            - @omea_gestion_telco_portability.services.messaging
+            - @doctrine.dbal.pnm_ppnm_connection
+        tags:
+            - { name: monolog.logger, channel: egp_simulator }

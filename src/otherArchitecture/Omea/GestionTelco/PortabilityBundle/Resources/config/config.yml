@@ -1,0 +1,66 @@
+parameters:
+    omea_gestion_telco_portability.config:
+        messages:
+            tables:
+                in: OMG_MESSAGE_IN
+                out: OMG_MESSAGE_OUT
+            states:
+                pending: 'ATraiter'
+                done: 'Traité'
+            marque_simm: 1
+        main:
+            tables:
+                in: OMG_PNM_IN
+                out: OMG_PNM_OUT
+                status: PNM_ACTIVATION_OMG
+            states:
+                in:
+                    pending: 'GO'
+                    done: 'SO'
+                out:
+                    pending: 'AT'
+                    done: 'OK'
+        tranches:
+            11:
+                in:
+                    start: '00:00'
+                    end: '11:00'
+                out:
+                    start: '15:00'
+                    end: '19:00'
+            15:
+                in:
+                    start: '11:00'
+                    end: '19:00'
+                out:
+                    start: '19:00'
+                    end: '21:00'
+            51:
+                in:
+                    start: '15:00'
+                    end: '17:30'
+                out:
+                    start: '13:30'
+                    end: '14:30'
+            sfr_conversion:
+                11: '1500'
+                15: '1900'
+                51: '1730'
+        networks:
+            orange: 0
+            virgin: 1
+            sfr: 2
+            migration: 3
+        operators:
+            op: '71'
+            optech: '02'
+            mvno: ['10', '11', '12', '15', '60', '61', '62', '63', '64', '65', '66', '67', '68', '69', '70', '71', '72', '73', '74', '75', '76', '77', '78', '79']
+        misc:
+            successReturnCode: '999'
+            autoactivatedIneligibilityReturnCodes: ['135', '300', '350']
+            ANRsuccessReturnCodes: ['947', '948', '999']
+            vipOffers: ['658', '659', '660', '675']
+            minDaysBeforePortage: 3
+            transactionStatus:
+                awaitingActivation: 13
+            OK: 0

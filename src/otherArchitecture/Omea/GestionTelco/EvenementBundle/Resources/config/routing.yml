@@ -1,0 +1,11 @@
+omea_gestion_telco_evenement_soap_server:
+    pattern: /
+    defaults: { _controller: 'OmeaGestionTelcoEvenementBundle:SoapServer:soap' }
+
+omea_gestion_telco_evenement_soap_server_wsdl:
+    pattern:  /wsdl
+    defaults: { _controller: 'OmeaGestionTelcoEvenementBundle:SoapServer:wsdl' }
+
+omea_gestion_telco_evenement_test_evenements:
+    pattern:  /test_hande_evenements
+    defaults: { _controller: 'OmeaGestionTelcoEvenementBundle:Test:handleEvent' }
