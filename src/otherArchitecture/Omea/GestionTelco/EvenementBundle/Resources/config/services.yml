@@ -22,6 +22,7 @@ services:
             - @omea_gestion_telco_evenement.actesmanager
             - @omea_gestion_telco_evenement.stockmsisdn.repository
             - @omea_gestion_telco_evenement.evenement.repository
+            - @omea_gestion_telco_evenement.gestionevenementerreur.repository
         tags:
             - { name: monolog.logger, channel: gestiontelco.evenement.actemanagerservice }
 

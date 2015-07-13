@@ -13,14 +13,19 @@ use Doctrine\ORM\Mapping as ORM;
 class GestionEvenementErreur
 {
     /**
-     * Ne pas abandonner la gestion de l'événement.
+     * la gestion de l'événement est a l'etat abandone.
      */
-    const ABANDON_NON = 0;
+    const ETAT_ABANDON = -1;
 
     /**
-     * Abandonner la gestion de l'événement.
+     * la gestion de l'événement est a traite.
      */
-    const ABANDON_OUI = 1;
+    const ETAT_A_TRAITE = 0;
+    
+    /**
+     * la gestion de l'événement est traite.
+     */
+    const ETAT_TRAITE = 0;
 
     /**
      * @var int
@@ -60,18 +65,42 @@ class GestionEvenementErreur
     /**
      * @var int
      *
-     * @ORM\Column(name="ABANDON", type="integer")
+     * @ORM\Column(name="ETAT", type="integer")
      */
-    private $abandon;
+    private $etat;
 
     /**
-     * @ORM\Column(name="TRAME", type="text")
+     * @ORM\Column(name="TRAME", type="trame_type")
      *
      * @var \Omea\Types\TrameType
      */
     private $trame;
 
     /**
+     * @return the $etat
+     */
+    public function getEtat()
+    {
+        return $this->etat;
+    }
+
+	/**
+     * @param number $id
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
+
+	/**
+     * @param number $etat
+     */
+    public function setEtat($etat)
+    {
+        $this->etat = $etat;
+    }
+
+	/**
      * Get id.
      *
      * @return int
@@ -175,30 +204,6 @@ class GestionEvenementErreur
     public function getErreurMessage()
     {
         return $this->erreurMessage;
-    }
-
-    /**
-     * Set abandon.
-     *
-     * @param int $abandon
-     *
-     * @return GestionEvenementErreur
-     */
-    public function setAbandon($abandon)
-    {
-        $this->abandon = $abandon;
-
-        return $this;
-    }
-
-    /**
-     * Get abandon.
-     *
-     * @return int
-     */
-    public function getAbandon()
-    {
-        return $this->abandon;
     }
 
     /**

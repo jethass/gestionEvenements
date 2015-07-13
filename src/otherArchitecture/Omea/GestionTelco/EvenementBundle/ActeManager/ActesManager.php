@@ -22,6 +22,8 @@ class ActesManager
     private $failedActe;
     
     private $actesDefinitions;
+    
+    private $erreurRaison;
 
     public function __construct(
         ActeOptionsSerializer $serializer,
@@ -41,15 +43,20 @@ class ActesManager
         $evenementsDefinition = $this->evenementDefinitionRepository->findOneBy(array('code' => $evenement->getCode()));
         
         if (!$evenementsDefinition || !$evenementsDefinition->getActesDefinition()) {
+            $this->erreurRaison = 'inconnu';
             throw new \RuntimeException("Aucun acte n'est capable de prendre en charge le code evenement ".$evenement->getCode());
         }
+        $this->erreurRaison = 'actes';
         
         foreach ($evenementsDefinition->getActesDefinition() as $acteDefinition) {
             $acte = $this->getActe($acteDefinition);
             try {
+                $options = $this->serializer->unserialize($acte->getOptionsClassname(), $acteDefinition->getOptions());
+                $acte->setOptions($options);
                 $acte->handle($evenement, $idClient);
-            } catch (Exception $e) {
-                $this->failedActe = $acte;
+            } catch (\Exception $e) {
+                $this->failedActe = $acteDefinition->getActe();
+                $this->actesDefinitions = $evenementsDefinition->getActesDefinition();
                 throw $e;
             }            
         }
@@ -102,5 +109,10 @@ class ActesManager
     public function getActesDefinitions()
     {
         return $this->actesDefinitions;
+    }
+    
+    public function getErreurRaison()
+    {
+        return $this->erreurRaison;
     }
 }

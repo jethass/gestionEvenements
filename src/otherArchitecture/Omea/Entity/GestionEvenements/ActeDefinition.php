@@ -37,7 +37,7 @@ class ActeDefinition implements ActeDefinitionInterface
     /**
      * @var int
      *
-     * @ORM\Column(name="poids", type="integer")
+     * @ORM\Column(name="POIDS", type="integer")
      */
     private $poids;
 

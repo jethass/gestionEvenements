@@ -4,6 +4,12 @@ services:
         factory_method: 'getRepository'
         class: 'Omea\Entity\GestionEvenements\EvenementRepository'
         arguments: ['Omea\Entity\GestionEvenements\Evenement']
+        
+    omea_gestion_telco_evenement.gestionevenementerreur.repository:
+        factory_service: 'doctrine.orm.gestionEvenements_entity_manager'
+        factory_method: 'getRepository'
+        class: 'Omea\Entity\GestionEvenements\GestionEvenementErreurRepository'
+        arguments: ['Omea\Entity\GestionEvenements\GestionEvenementErreur']
     
     omea_gestion_telco_evenement.evenementdefinition.repository:
         factory_service: 'doctrine.orm.gestionEvenements_entity_manager'

@@ -30,14 +30,14 @@ class Acte
     /**
      * @var string
      *
-     * @ORM\Column(name="options", type="string", length=45)
+     * @ORM\Column(name="OPTIONS", type="string", length=45)
      */
     private $options;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="description", type="string", length=255)
+     * @ORM\Column(name="DESCRIPTION", type="string", length=255)
      */
     private $description;
 

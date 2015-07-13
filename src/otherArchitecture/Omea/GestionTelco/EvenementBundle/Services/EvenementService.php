@@ -11,8 +11,8 @@ use Psr\Log\LoggerInterface;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Omea\GestionTelco\EvenementBundle\Entity\Evenement;
-use Omea\GestionTelco\EvenementBundle\Entity\EvenementRepository;
+use Omea\Entity\GestionEvenements\Evenement;
+use Omea\Entity\GestionEvenements\EvenementRepository;
 
 class EvenementService
 {
@@ -114,10 +114,10 @@ class EvenementService
 
                 $this->gestionEvenementsManagerManager->persist($evenement);
                 $this->gestionEvenementsManagerManager->flush();
-                 return new SaveEvenementResponse('0', 'Inserted OK',1);
+                 return new SaveEvenementResponse('0','Inserted OK',1);
             
         }else{
-             throw new InvalidArgumentException('Inserted KO');
+                 return new SaveEvenementResponse(InvalidArgumentException::INVALID_ARGUMENT_EXCEPTION, 'Inserted KO',0);
         }
     }
 

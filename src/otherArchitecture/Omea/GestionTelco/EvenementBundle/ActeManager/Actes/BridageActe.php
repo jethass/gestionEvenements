@@ -62,7 +62,7 @@ class BridageActe implements ActeInterface, ConfigurableActeInterface
     {
         $msisdn = $evenement->getMsisdn();
         $idOption = $this->options->idOption;
-        $idOptionGroupe = $this->options->idOptionGroup;
+        $idOptionGroupe = $this->options->idOptionGroupe;
         $idConseiller = $this->paramsConfig['id_conseiller'];
         $raz = $this->paramsConfig['raz'];
         
@@ -72,16 +72,16 @@ class BridageActe implements ActeInterface, ConfigurableActeInterface
                 'soap_version' => SOAP_1_1
         );
         $wsdl=$this->wsAddBridage.'/wsdl';
-        $wsSoapBridage = new WsGestionClientOptionService($options, $wsdl);
+        $wsSoapBridage = new WsGestionClientOptionService($wsdl, $options);
         $trameClient = new GestionClientOptionAddOption();
         $trameClient->setIdClient($idClient);
         $trameClient->setIdOption($idOption);
         $trameClient->setIdOptionGroup($idOptionGroupe);
         $trameClient->setIdConseiller($idConseiller);
-        $trameClient->setIdActivite($idActivite);
+        $trameClient->setIdActivite(1);
         $trameClient->setJusquaRaz($raz);
         $wsSoapBridage->addOption($trameClient);
-        $this->logger->info('Successfully Add bridage ');
+        $this->logger->info('Successfully added bridage ');
     }
     
     

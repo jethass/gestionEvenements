@@ -25,39 +25,93 @@ class Evenement implements EvenementInterface
     /**
      * @var string
      *
-     * @ORM\Column(name="code", type="string", length=10)
+     * @ORM\Column(name="CODE", type="string", length=10)
      */
     private $code;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="type", type="string", length=45)
+     * @ORM\Column(name="TYPE", type="string", length=45)
      */
     private $type;
 
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="date_appel", type="datetime", nullable=true)
+     * @ORM\Column(name="DATE_APPEL", type="datetime", nullable=true)
      */
     private $dateAppel;
 
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="date_traitement", type="datetime", nullable=true)
+     * @ORM\Column(name="DATE_TRAITEMENT", type="datetime", nullable=true)
      */
     private $dateTraitement;
 
     /**
      * @var int
      *
-     * @ORM\Column(name="msisdn", type="integer", columnDefinition="INT(10) UNSIGNED ZEROFILL")
+     * @ORM\Column(name="MSISDN", type="integer", columnDefinition="INT(10) UNSIGNED ZEROFILL")
      */
     private $msisdn;
+    
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="ERREUR", type="integer")
+     */
+    private $erreur;
+    
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="ERREUR_RAISON", type="string")
+     */
+    private $erreurRaison;
 
     /**
+     * @return the $erreur
+     */
+    public function getErreur()
+    {
+        return $this->erreur;
+    }
+
+	/**
+     * @return the $erreurRaison
+     */
+    public function getErreurRaison()
+    {
+        return $this->erreurRaison;
+    }
+
+	/**
+     * @param number $idEvenement
+     */
+    public function setIdEvenement($idEvenement)
+    {
+        $this->idEvenement = $idEvenement;
+    }
+
+	/**
+     * @param number $erreur
+     */
+    public function setErreur($erreur)
+    {
+        $this->erreur = $erreur;
+    }
+
+	/**
+     * @param number $erreurRaison
+     */
+    public function setErreurRaison($erreurRaison)
+    {
+        $this->erreurRaison = $erreurRaison;
+    }
+
+	/**
      * Get id.
      *
      * @return int
@@ -146,7 +200,7 @@ class Evenement implements EvenementInterface
      *
      * @return Evenements
      */
-    public function setDateTraitement(\DateTime $dateTraitement)
+    public function setDateTraitement(\DateTime $dateTraitement=null)
     {
         $this->dateTraitement = $dateTraitement;
 

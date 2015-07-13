@@ -24,7 +24,7 @@ class Service
     /**
      * @var string
      *
-     * @ORM\Column(name="nom", type="string", length=45)
+     * @ORM\Column(name="NOM", type="string", length=45)
      */
     private $nom;
 

@@ -6,20 +6,20 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class EvenementCommand extends ContainerAwareCommand
+class RattrapageCommand extends ContainerAwareCommand
 {
     protected function configure()
     {
         
         $this
-            ->setName('evenement:handle_evenement')
-            ->setDescription('lance le traitement des evenements')
+            ->setName('evenement:rattrapage')
+            ->setDescription('lance le rattrapage des evenements en erreur')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
          $actesManagerService = $this->getContainer()->get('omea_gestion_telco_evenement.actesmanagerservice');
-         $actesManagerService->handleEvenements();
+         $actesManagerService->rattrapageEvenements();
     }
 }

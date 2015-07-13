@@ -61,7 +61,7 @@ class HistoActe implements ActeInterface
                 'soap_version' => SOAP_1_1
         );
         $wsdl = $this->wsPoseHisto.'/wsdl';
-        $WsPoseHistoService = new WsPoseHistoService($options,$wsdl);
+        $WsPoseHistoService = new WsPoseHistoService($wsdl, $options);
         $trameClient = new PoseHistoData();
         $trameClient->setIdClient($idClient);
         $trameClient->setIdEvent($id_event);

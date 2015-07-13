@@ -7,31 +7,32 @@ use Omea\GestionTelco\EvenementBundle\Types\SaveEvenementRequest;
 use Omea\GestionTelco\EvenementBundle\Exception\InvalidArgumentException;
 use Omea\GestionTelco\EvenementBundle\Types\BaseResponse;
 use Omea\GestionTelco\EvenementBundle\Types\SaveEvenementResponse;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 /**
  * @author hlataoui
  */
-class EvenementServiceTest extends \PHPUnit_Framework_TestCase
+class EvenementServiceTest extends WebTestCase
 {
     private $logger;
     private $validator;
     private $doctrine;
+    private $entityManager;
 
     public function setUp()
     {
-         parent::setUp();
-         $this->logger = $this->getMockBuilder('Psr\Log\LoggerInterface')->disableOriginalConstructor()->getMock();
+         $this->logger=$this->getMockBuilder('Psr\Log\LoggerInterface')->disableOriginalConstructor()->getMock();
          $this->validator=$this->getMockBuilder('Symfony\Component\Validator\Validator\ValidatorInterface')->getMock();
-         $entityManager = $this->getMockBuilder('\Doctrine\ORM\EntityManager')->disableOriginalConstructor()->getMock();        
-         $this->doctrine = $this->getMockBuilder('Symfony\Bridge\Doctrine\RegistryInterface')->disableOriginalConstructor()->getMock();
-         $this->doctrine->expects($this->once())->method('getManager')->will($this->returnValue($entityManager));
+         $this->doctrine=$this->getMockBuilder('Symfony\Bridge\Doctrine\RegistryInterface')->disableOriginalConstructor()->getMock();
+         $this->entityManager = $this->getMockBuilder('Doctrine\ORM\EntityManager')->disableOriginalConstructor()->getMock();
+         //$this->doctrine->expects($this->once())->method('getManager')->will($this->returnValue($this->entityManager));
     }
 
     
     
     public function testSaveEvenementOk()
     {
-        $evenementService = new EvenementService($this->validator, $this->logger, $this->doctrine);
+        $evenementService = new EvenementService($this->validator, $this->logger, $this->entityManager);
         $saveEvenementRequest = new SaveEvenementRequest();
         $saveEvenementRequest->msisdn='0685478554';
         $saveEvenementRequest->code='Alerte_HIS';
@@ -43,7 +44,7 @@ class EvenementServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testSaveEvenementKo()
     {
-        $evenementService = new EvenementService($this->validator, $this->logger, $this->doctrine);
+        $evenementService = new EvenementService($this->validator, $this->logger, $this->entityManager);
         $saveEvenementRequest = new SaveEvenementRequest();
         $saveEvenementRequest->msisdn=null;
         $saveEvenementRequest->code=null;

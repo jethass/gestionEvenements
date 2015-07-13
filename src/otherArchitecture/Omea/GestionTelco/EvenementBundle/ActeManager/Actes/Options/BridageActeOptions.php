@@ -8,5 +8,5 @@ use Omea\GestionTelco\EvenementBundle\ActeManager\ActeOptionsInterface;
 class BridageActeOptions implements ActeOptionsInterface
 {
     public $idOption;
-    public $idOptionGroup;
+    public $idOptionGroupe;
 }

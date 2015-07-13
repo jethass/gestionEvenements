@@ -10,7 +10,7 @@ namespace Omea\GestionTelco\EvenementBundle\Types;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
-use Omea\GestionTelco\EvenementBundle\DTO\ActeDefinition;
+use Omea\Entity\GestionEvenements\ActeDefinition;
 
 class TrameType extends Type
 {
@@ -51,12 +51,12 @@ class TrameType extends Type
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
         $arr = array();
-
+        
         //sérialiser array de ActeDefinition en json
         foreach ($value as $elem) {
             $arr[] = array('name' => $elem->getName(), 'options' => $elem->getOptions());
         }
-
+        
         return (json_encode($arr));
     }
 }

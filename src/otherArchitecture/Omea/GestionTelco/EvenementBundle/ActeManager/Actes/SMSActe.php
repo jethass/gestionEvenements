@@ -82,7 +82,7 @@ class SMSActe implements ActeInterface, ConfigurableActeInterface
             'soap_version' => SOAP_1_1
         );
         $wsdl=$wsEligibilityPassEurope.'/wsdl';
-        $WsEligibilityService = new WsGestionClientPassService($options, $wsdl);
+        $WsEligibilityService = new WsGestionClientPassService($wsdl, $options);
         $trameClient = new GestionClientPassVerifEligibilitePass();
         $trameClient->setIdClient($id_client);
         $trameClient->setIdOption($id_option);
@@ -99,7 +99,7 @@ class SMSActe implements ActeInterface, ConfigurableActeInterface
             'soap_version' => SOAP_1_1
         );
         $wsdl=$wsEnvoiSms.'/wsdl';
-        $wsEnvoiSmsService=new WsGestionCommunicationSmsService($options,$wsdl);
+        $wsEnvoiSmsService = new WsGestionCommunicationSmsService($wsdl, $options);
         $trameClient = new GestionCommunicationNotifierEvenementSms();
         $trameClient->setCodeTemplate($code_template);
         $trameClient->setIdClient($id_client);
