@@ -1,11 +1,5 @@
 <?php
 
-/**
- * Created by PhpStorm.
- * User: rserale
- * Date: 29/06/15
- * Time: 14:30.
- */
 namespace Omea\GestionTelco\EvenementBundle\Services;
 
 use Doctrine\ORM\EntityManager;
@@ -63,10 +57,10 @@ class ActesManagerService
     }
 
     /**
+     * Recupere la table StockMsisdn a partir du msisdn
+     *  
      * @param string $msisdn
-     *
      * @return \Omea\Entity\Main\StockMsisdn
-     *
      * @throws NotFoundException
      */
     public function getStockMsisdn($msisdn)
@@ -79,60 +73,103 @@ class ActesManagerService
         return $stockMsisdn;
     }
     
+    /**
+     * Permet de traiter les evenements en attente
+     */
     public function handleEvenements()
     {
-            $evenements = $this->evenementRepository->findBy(array('dateTraitement' => null, 'type' => 'Notification', 'erreur' => 0));
-            
-            foreach ($evenements as $key => $evenement) {
-                try {
-                    $stockMsisdn = $this->getStockMsisdn($evenement->getMsisdn());
-                    $this->actesManager->handle($evenement, $stockMsisdn->getIdClient());
-                    $evenement->setDateTraitement(new \Datetime('now'));
-                    $this->gestionEvenementsManager->persist($evenement);
-                    $this->logger->info("L'évènement ".$evenement->getCode()." (id: ".$evenement->getIdEvenement().") a bien été traité. ");
-                } catch (\LogicException $e) {
-                    
-                    $acte = $this->actesManager->getFailedActe();
-                    $trame= $this->actesManager->getActesDefinitions();
-                    $gestionEvenementErreur = new GestionEvenementErreur();
-                    $gestionEvenementErreur->setEvenement($evenement);
-                    $gestionEvenementErreur->setActeKo($acte);
-                    $gestionEvenementErreur->setDateErreur(new \Datetime('now'));
-                    $gestionEvenementErreur->setErreurMessage($e->getMessage());
-                    $gestionEvenementErreur->setEtat(GestionEvenementErreur::ETAT_A_TRAITE);
-                    $gestionEvenementErreur->setTrame($trame);
-                    $this->gestionEvenementsManager->persist($gestionEvenementErreur);
-                    
-                    $evenement->setErreur(1);
-                    $evenement->setErreurRaison($this->actesManager->getErreurRaison());
-                    $this->gestionEvenementsManager->persist($evenement);
-
-                    $this->logger->error("Erreur lors de la gestion de l'évènement '".$evenement->getCode()."': ".$e->getMessage().'');
-                }
-            }
-            $this->gestionEvenementsManager->flush();
-    }
-    
-    public function rattrapageEvenements()
-    {
-        $gestionEvenementsErreur = $this->gestionEvenementErreurRepository->findBy(array('etat' => GestionEvenementErreur::ETAT_A_TRAITE));
+        $nb = ['ok' => 0, 'ko' => 0]; // Le literal c'est la vie
+        $evenements = $this->evenementRepository->findBy(array('dateTraitement' => null, 'type' => 'Notification', 'erreur' => 0));
         
-        foreach ($gestionEvenementsErreur as $key => $gestionEvenementErreur) {
+        foreach ($evenements as  $evenement) {
             try {
-                $evenement = $gestionEvenementErreur->getEvenement();
-                $stockMsisdn = $this->getStockMsisdn($evenement->getMsisdn());
-                $this->actesManager->handle($evenement, $stockMsisdn->getIdClient());
-                $evenement->setDateTraitement(new \Datetime('now'));
-                $this->evenementRepository->persist($evenement);
-                $gestionEvenementErreur->setEtat(GestionEvenementErreur::ETAT_TRAITE);
-                $this->gestionEvenementsManager->persist($gestionEvenementErreur);
-    
-            } catch (\LogicException $e) {
+                $this->logger->debug("Debut du traitement de l'evenement ".$evenement->getIdEvenement()." avec le code ".$evenement->getCode()." et le msisdn ".$evenement->getMsisdn());
                 
-                $gestionEvenementErreur->setEtat(GestionEvenementErreur::ETAT_ABANDON);
+                $stockMsisdn = $this->getStockMsisdn($evenement->getMsisdn());
+                
+                // Traite l'evenement
+                $this->actesManager->handle($evenement, $stockMsisdn->getIdClient());
+                
+                // Met a jour la table pour ne plus traite l'evenement
+                $evenement->setDateTraitement(new \Datetime('now'));
+                $this->gestionEvenementsManager->persist($evenement);
+                
+                $this->gestionEvenementsManager->flush();
+                
+                $nb['ok']++;
+                
+                $this->logger->info("L'évènement ".$evenement->getCode()." (id: ".$evenement->getIdEvenement().") a bien été traité.");
+            } catch (\Exception $e) {
                 
                 $acte = $this->actesManager->getFailedActe();
                 $trame = $this->actesManager->getActesDefinitions();
+                
+                // Cree une nouvelle entree dans gestionEvenementErreur pour un prochain rattrapage
+                $gestionEvenementErreur = new GestionEvenementErreur();
+                $gestionEvenementErreur->setEvenement($evenement);
+                $gestionEvenementErreur->setActeKo($acte);
+                $gestionEvenementErreur->setDateErreur(new \Datetime('now'));
+                $gestionEvenementErreur->setErreurMessage($e->getMessage());
+                $gestionEvenementErreur->setEtat(GestionEvenementErreur::ETAT_A_TRAITE);
+                $gestionEvenementErreur->setTrame($trame);
+                $this->gestionEvenementsManager->persist($gestionEvenementErreur);
+                
+                // Met a jour l'evenement
+                $evenement->setErreur(1);
+                $evenement->setErreurRaison($this->actesManager->getErreurRaison());
+                $this->gestionEvenementsManager->persist($evenement);
+                
+                $this->gestionEvenementsManager->flush();
+                
+                $nb['ko']++;
+
+                $this->logger->warning("Erreur lors de la gestion de l'évènement '".$evenement->getCode()."': ".$e->getMessage().'');
+            }
+        }
+        
+        return $nb;
+    }
+    
+    /**
+     * Permet de rattraper les evenements tombe en erreur
+     */
+    public function rattrapageEvenements()
+    {
+        $nb = ['ok' => 0, 'ko' => 0]; // Le literal c'est la mort
+        $gestionEvenementsErreur = $this->gestionEvenementErreurRepository->findBy(array('etat' => GestionEvenementErreur::ETAT_A_TRAITE));
+        
+        foreach ($gestionEvenementsErreur as $gestionEvenementErreur) {
+            
+            $evenement = $gestionEvenementErreur->getEvenement();
+            
+            $this->logger->debug("Debut du traitement de l'evenement ".$evenement->getIdEvenement()." avec le code ".$evenement->getCode()." et le msisdn ".$evenement->getMsisdn());
+            
+            try {
+                $stockMsisdn = $this->getStockMsisdn($evenement->getMsisdn());
+                $this->actesManager->handle($evenement, $stockMsisdn->getIdClient());
+                
+                // Met a jour l'evenement original
+                $evenement->setDateTraitement(new \Datetime('now'));
+                $this->gestionEvenementsManager->persist($evenement);
+                
+                // Clos l'erreur dans gestionEvenementErreur
+                $gestionEvenementErreur->setEtat(GestionEvenementErreur::ETAT_TRAITE);
+                $this->gestionEvenementsManager->persist($gestionEvenementErreur);
+                
+                $this->gestionEvenementsManager->flush();
+                
+                $nb['ok']++;
+                
+                $this->logger->info("L'évènement ".$evenement->getCode()." (id: ".$evenement->getIdEvenement().") a bien été traité.");
+    
+            } catch (\Exception $e) {
+                
+                // Clos l'erreur dans gestionEvenementErreur
+                $gestionEvenementErreur->setEtat(GestionEvenementErreur::ETAT_ABANDON);
+                $acte = $this->actesManager->getFailedActe();
+                $trame = $this->actesManager->getActesDefinitions();
+                
+                // Cree une nouvelle entree dans gestionEvenementErreur pour un prochain rattrapage
                 $newGestionEvenementErreur = new GestionEvenementErreur();
                 $newGestionEvenementErreur->setEvenement($evenement);
                 $newGestionEvenementErreur->setActeKo($acte);
@@ -142,12 +179,15 @@ class ActesManagerService
                 $newGestionEvenementErreur->setTrame($trame);
                 $this->gestionEvenementsManager->persist($newGestionEvenementErreur);
                 $this->gestionEvenementsManager->persist($gestionEvenementErreur);
+                
+                $this->gestionEvenementsManager->flush();
+                
+                $nb['ko']++;
     
-                $this->logger->error("Erreur lors de la gestion de l'évènement '".$evenement->getCode()."': ".$e->getMessage().'');
+                $this->logger->warning("Erreur lors de la gestion de l'évènement '".$evenement->getCode()."': ".$e->getMessage().'');
             }
-  
         }
-        $this->gestionEvenementsManager->flush();
+        
+        return $nb;
     }
-
 }

@@ -68,8 +68,12 @@ class HistoActe implements ActeInterface
         $trameClient->setCommMan($commMan);
         $trameClient->setPriorite($priorite);       
         $trameClient->setIdConseiller($id_conseiller);
-        $WsPoseHistoService->poseHistoByEvent($trameClient);
-        $this->logger->info('Successfully Pose Histo Event ');
+        
+        $this->logger->debug('Appel du ws '.$this->wsPoseHisto." avec les parametres ".print_r($trameClient, true));
+        
+        $retour = $WsPoseHistoService->poseHistoByEvent($trameClient);
+        
+        $this->logger->debug('retour du ws '.$this->wsPoseHisto." ".print_r($retour, true));
     }
  
 }

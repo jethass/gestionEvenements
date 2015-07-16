@@ -19,7 +19,18 @@ class EvenementCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-         $actesManagerService = $this->getContainer()->get('omea_gestion_telco_evenement.actesmanagerservice');
-         $actesManagerService->handleEvenements();
+         try {
+             $output->writeln("Debut du traitement des evenements : ");
+             $actesManagerService = $this->getContainer()->get('omea_gestion_telco_evenement.actesmanagerservice');
+             $retourEvenement = $actesManagerService->handleEvenements();
+         
+             $output->writeln(
+                 "Nombre d'evenement OK : ".(int)$retourEvenement['ok']);
+             $output->writeln(
+                 "Nombre d'evenement KO : ".(int)$retourEvenement['ko']);
+         
+         } catch(\Exception $e) {
+             $output->writeln("Erreur : ".$e->getMessage());
+         }
     }
 }

@@ -14,37 +14,31 @@ use Omea\GestionTelco\EvenementBundle\ActeManager\ActeOptionsInterface;
 
 class BridageActe implements ActeInterface, ConfigurableActeInterface
 {
-
     /**
      * @var string
      */
     private $wsAddBridage;
-    
-        
+     
     /**
     *  @var ActesManagerService
     */
     private $actesManagerService;
-    
     
     /**
      * @var LoggerInterface
      */
     protected $logger;
 
-       
     /**
      * @var array
      */
     private $paramsConfig;
-    
     
     /**
      * @var BridageActeOptions
      */
     private $options;
     
-
     /**
      * @param string              $wsAddBridage
      * @param ActesManagerService $actesManagerService
@@ -71,8 +65,9 @@ class BridageActe implements ActeInterface, ConfigurableActeInterface
                 'location' => $this->wsAddBridage,
                 'soap_version' => SOAP_1_1
         );
-        $wsdl=$this->wsAddBridage.'/wsdl';
+        $wsdl = $this->wsAddBridage.'/wsdl';
         $wsSoapBridage = new WsGestionClientOptionService($wsdl, $options);
+        
         $trameClient = new GestionClientOptionAddOption();
         $trameClient->setIdClient($idClient);
         $trameClient->setIdOption($idOption);
@@ -80,8 +75,12 @@ class BridageActe implements ActeInterface, ConfigurableActeInterface
         $trameClient->setIdConseiller($idConseiller);
         $trameClient->setIdActivite(1);
         $trameClient->setJusquaRaz($raz);
-        $wsSoapBridage->addOption($trameClient);
-        $this->logger->info('Successfully added bridage ');
+        
+        $this->logger->debug('Appel du ws '.$this->wsAddBridage." avec les parametres ".print_r($trameClient, true));
+        
+        $retour = $wsSoapBridage->addOption($trameClient);
+        
+        $this->logger->debug('retour du ws '.$this->wsAddBridage." ".print_r($retour, true));
     }
     
     
@@ -98,5 +97,13 @@ class BridageActe implements ActeInterface, ConfigurableActeInterface
     public function validateOptions()
     {
         return array();
+    }
+    
+    /**
+     * Retourne des chatons, on en aura sans doute besoin un jour
+     * @return string
+     */
+    public function getChatons(){
+        return 'Chatons';
     }
 }

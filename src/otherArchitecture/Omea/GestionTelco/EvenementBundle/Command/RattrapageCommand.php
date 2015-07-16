@@ -19,7 +19,18 @@ class RattrapageCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-         $actesManagerService = $this->getContainer()->get('omea_gestion_telco_evenement.actesmanagerservice');
-         $actesManagerService->rattrapageEvenements();
+        try {
+            $output->writeln("Debut du traitement des rattrapages : ");
+            $actesManagerService = $this->getContainer()->get('omea_gestion_telco_evenement.actesmanagerservice');
+            $retourRattrapage = $actesManagerService->rattrapageEvenements();
+            
+            $output->writeln(
+                "Nombre de rattrapage OK : ".(int)$retourRattrapage['ok']);
+            $output->writeln(
+                "Nombre de rattrapage KO : ".(int)$retourRattrapage['ko']);
+            
+        } catch(\Exception $e) {
+            $output->writeln("Erreur : ".$e->getMessage());
+        }
     }
 }

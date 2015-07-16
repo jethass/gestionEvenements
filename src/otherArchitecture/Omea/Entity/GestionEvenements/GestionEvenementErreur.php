@@ -25,7 +25,7 @@ class GestionEvenementErreur
     /**
      * la gestion de l'événement est traite.
      */
-    const ETAT_TRAITE = 0;
+    const ETAT_TRAITE = 1;
 
     /**
      * @var int

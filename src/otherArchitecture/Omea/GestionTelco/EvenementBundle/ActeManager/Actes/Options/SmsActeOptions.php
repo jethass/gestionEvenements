@@ -10,5 +10,5 @@ class SmsActeOptions implements ActeOptionsInterface
 {
     public $codeTemplate;
     public $idOption;
-    public $idOptionGroupe;
+    public $idOptionGroup;
 }

@@ -59,53 +59,77 @@ class SMSActe implements ActeInterface, ConfigurableActeInterface
     {
         $code = $evenement->getCode();
         $msisdn = $evenement->getMsisdn();
-        $code_template = $this->options->codeTemplate;
+        $codeTemplate = $this->options->codeTemplate;
         $idOption = $this->options->idOption;
-        $idOptionGroup=$this->options->idOptionGroup;
+        $idOptionGroup = $this->options->idOptionGroup;
 
         if ($code == 'Alerte_OCR') {
-            $result = $this->doCallWSEligibilityPassEurope($id_event,$idClient,$id_option,$idOptionGroup,$id_acte, $this->wsEligibilityPassEurope);
-            if ($result) {
-                $this->doCallWSEnvoiSms($code_template,$idClient,$id_event,$idOption,$id_acte,$this->wsEnvoiSms);
+            $result = $this->doCallWSEligibilityPassEurope($idClient, $idOption, $idOptionGroup, $this->wsEligibilityPassEurope);
+            if ($result->codeRetour == 0) {
+                $this->doCallWSEnvoiSms($codeTemplate, $idClient, $idOption, $this->wsEnvoiSms);
             }
         } else {
-                $this->doCallWSEnvoiSms($code_template,$idClient,$id_event,$idOption,$id_acte,$this->wsEnvoiSms);
+                $this->doCallWSEnvoiSms($codeTemplate, $idClient, $idOption, $this->wsEnvoiSms);
 
         }
     }
     
-    public function doCallWSEligibilityPassEurope($id_event,$id_client,$id_option,$id_option_group,$id_acte, $wsEligibilityPassEurope)
+    /**
+     * Appel du ws pour tester si le client est eligible au pass dooble trotter
+     * 
+     * @param integer $id_event
+     * @param integer $id_client
+     * @param integer $id_option
+     * @param integer $id_option_group
+     * @param string $wsEligibilityPassEurope
+     */
+    public function doCallWSEligibilityPassEurope($idClient, $idOption, $idOptionGroup, $wsEligibilityPassEurope)
     {
         $options = array(
             'uri' => $wsEligibilityPassEurope,
             'location' => $wsEligibilityPassEurope,
             'soap_version' => SOAP_1_1
         );
-        $wsdl=$wsEligibilityPassEurope.'/wsdl';
+        $wsdl = $wsEligibilityPassEurope.'/wsdl';
         $WsEligibilityService = new WsGestionClientPassService($wsdl, $options);
         $trameClient = new GestionClientPassVerifEligibilitePass();
-        $trameClient->setIdClient($id_client);
-        $trameClient->setIdOption($id_option);
-        $trameClient->setIdOptionGroup($id_option_group);
-        $WsEligibilityService->verifEligibilitePass($trameClient);
-        $this->logger->info('Eligible To Pass Europe ');
+        $trameClient->setIdClient($idClient);
+        $trameClient->setIdOption($idOption);
+        $trameClient->setIdOptionGroup($idOptionGroup);
+        
+        $this->logger->debug('Appel du ws '.$wsEligibilityPassEurope." avec les parametres ".print_r($trameClient, true));
+        
+        $result = $WsEligibilityService->verifEligibilitePass($trameClient);
+        
+        $this->logger->debug('Retour du ws '.$wsEligibilityPassEurope." ".print_r($result, true));
+        
+        return $result;
     }
 
-    public function doCallWSEnvoiSms($code_template,$id_client,$id_event,$id_option,$id_acte,$wsEnvoiSms)
+    /**
+     * Appel au ws d'envoi de sms
+     * 
+     * @param string $code_template
+     * @param integer $id_client
+     * @param integer $id_event
+     * @param integer $id_option
+     * @param string $wsEnvoiSms
+     */
+    public function doCallWSEnvoiSms($codeTemplate, $idClient, $idOption, $wsEnvoiSms)
     {
         $options = array(
             'uri' => $wsEnvoiSms,
             'location' => $wsEnvoiSms,
             'soap_version' => SOAP_1_1
         );
-        $wsdl=$wsEnvoiSms.'/wsdl';
+        $wsdl = $wsEnvoiSms.'/wsdl';
         $wsEnvoiSmsService = new WsGestionCommunicationSmsService($wsdl, $options);
         $trameClient = new GestionCommunicationNotifierEvenementSms();
-        $trameClient->setCodeTemplate($code_template);
-        $trameClient->setIdClient($id_client);
-        $trameClient->setIdEvent($id_event);
-        $trameClient->setIdOption($id_option);
+        $trameClient->setCodeTemplate($codeTemplate);
+        $trameClient->setIdClient($idClient);
+        $trameClient->setIdOption($idOption);
         $wsEnvoiSmsService->notifierEvenementSms($trameClient);
+        
         $this->logger->info('Successfully Send SMS Event ');
     }
 

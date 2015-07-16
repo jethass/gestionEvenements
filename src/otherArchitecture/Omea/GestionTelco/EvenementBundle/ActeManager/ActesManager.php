@@ -51,10 +51,16 @@ class ActesManager
         foreach ($evenementsDefinition->getActesDefinition() as $acteDefinition) {
             $acte = $this->getActe($acteDefinition);
             try {
-                $options = $this->serializer->unserialize($acte->getOptionsClassname(), $acteDefinition->getOptions());
-                $acte->setOptions($options);
+                // Si l'acte a une gestion d'option
+                if($acte instanceof ConfigurableActeInterface){
+                    $options = $this->serializer->unserialize($acte->getOptionsClassname(), $acteDefinition->getOptions());
+                    $acte->setOptions($options);
+                }
+                
+                // Aller on execute et on pri le dieu de l'internet
                 $acte->handle($evenement, $idClient);
             } catch (\Exception $e) {
+                
                 $this->failedActe = $acteDefinition->getActe();
                 $this->actesDefinitions = $evenementsDefinition->getActesDefinition();
                 throw $e;
