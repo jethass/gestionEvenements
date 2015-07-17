@@ -1,11 +1,4 @@
 <?php
-
-/**
- * Created by PhpStorm.
- * User: rserale
- * Date: 16/06/15
- * Time: 12:16.
- */
 namespace Omea\GestionTelco\EvenementBundle\ActeManager;
 use Omea\GestionTelco\EvenementBundle\ActeManager\Actes\Options\HistoActeOptions;
 use Omea\GestionTelco\EvenementBundle\ActeManager\Actes\Options\BridageActeOptions;
@@ -18,6 +11,7 @@ class ActeOptionsSerializer
 {
     public function serialize(ActeOptionsInterface $acteOptions)
     {
+        // prend un objet => retourne un tableau, puis prend le tableau et retourne une http query  "key=value&key2=value2"
         return http_build_query(get_object_vars($acteOptions));
     }
 
@@ -27,14 +21,14 @@ class ActeOptionsSerializer
             throw new \InvalidArgumentException($acteOptionsClassname.' does not exist');
         }
 
-        $acteOptions = new $acteOptionsClassname();
+        $acteOptions = new $acteOptionsClassname(); //initialisation de notre objet
         if (!($acteOptions instanceof ActeOptionsInterface)) {
             throw new \InvalidArgumentException($acteOptionsClassname.' does not implements ActeOptionsInterface');
         }
 
-        parse_str($serializedOptions, $options);
-        foreach ($options as $key => $value) {
-            if (!property_exists($acteOptionsClassname, $key)) {
+        parse_str($serializedOptions, $options); //prend une http query et le transforme en tableau
+        foreach ($options as $key => $value) { //parcour le tableau
+            if (!property_exists($acteOptionsClassname, $key)) { // vérifi si la cle de tableau sont des attribut de notre classe objet "acteOptionsClassname"
                 throw new \InvalidArgumentException(
                     sprintf(
                         'property "%s" does not exist in "%s"',
@@ -44,7 +38,7 @@ class ActeOptionsSerializer
                 );
             }
 
-            $acteOptions->$key = $value;
+            $acteOptions->$key = $value; //création de l'objet a partir de tableau
         }
 
         return $acteOptions;

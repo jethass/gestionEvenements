@@ -12,7 +12,7 @@ class EvenementCommand extends ContainerAwareCommand
     {
         
         $this
-            ->setName('evenement:handle_evenement')
+            ->setName('evenement:handle')
             ->setDescription('lance le traitement des evenements')
         ;
     }
