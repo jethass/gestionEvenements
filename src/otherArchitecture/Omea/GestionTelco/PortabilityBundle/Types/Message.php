@@ -3,6 +3,10 @@ namespace Omea\GestionTelco\PortabilityBundle\Types;
 
 class Message
 {
+    /** Unique identifier of the message in its storage table
+     * @var string
+     */
+    public $id;
     /** Current state of the message
      * @var string
      */
@@ -52,7 +56,7 @@ class Message
      */
     public $opat;
     /** Unique identifier for the portability
-     * @var int
+     * @var string
      */
     public $idPortage;
     /** The date (Y-m-d) the portability was created on
@@ -74,6 +78,21 @@ class Message
 
     public function __construct($values = array())
     {
+        if (!empty($values['ID_OPI'])) {
+            $this->id = $values['ID_OPI'];
+        }
+        if (!empty($values['ID_OPO'])) {
+            $this->id = $values['ID_OPO'];
+        }
+        if (!empty($values['ID'])) {
+            $this->id = $values['ID'];
+        }
+        if (!empty($values['ETAT'])) {
+            $this->state = $values['ETAT'];
+        }
+        if (!empty($values['ETAT_MESSAGE'])) {
+            $this->state = $values['ETAT_MESSAGE'];
+        }
         if (!empty($values['OPERATION'])) {
             $this->operation = $values['OPERATION'];
         }

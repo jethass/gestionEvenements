@@ -2,8 +2,7 @@
 namespace Omea\GestionTelco\PortabilityBundle\Services\Queues;
 
 use Psr\Log\LoggerInterface;
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Statement;
+use Omea\GestionTelco\PortabilityBundle\Services\MainRepositoryService;
 use Omea\GestionTelco\PortabilityBundle\Services\MessagingService;
 use Omea\GestionTelco\PortabilityBundle\Services\DateService;
 use Omea\GestionTelco\PortabilityBundle\Services\External\Provisioning\ProvisioningServiceInterface;
@@ -22,18 +21,18 @@ class IncomingPortabilityActivationQueue extends AbstractQueue implements QueueI
      * @param LoggerInterface              $logger
      * @param array                        $config
      * @param MessagingService             $messaging
-     * @param Connection                   $mainDb
+     * @param MainRepositoryService        $main
      * @param DateService                  $dates
      * @param ProvisioningServiceInterface $provisioning
      */
     public function __construct(LoggerInterface $logger,
                                 array $config,
                                 MessagingService $messaging,
-                                Connection $mainDb,
+                                MainRepositoryService $main,
                                 DateService $dates,
                                 ProvisioningServiceInterface $provisioning)
     {
-        parent::__construct($logger, $config, $messaging, $mainDb);
+        parent::__construct($logger, $config, $messaging, $main);
         $this->dates = $dates;
         $this->provisioning = $provisioning;
     }
@@ -76,11 +75,11 @@ class IncomingPortabilityActivationQueue extends AbstractQueue implements QueueI
                     AND PI.OPERATION = 'GOP'
                     AND PAO.NUM_ABO IS NULL
                     AND SN.ETAT = '0'
-                    AND DATEPORTAGE <= ?
+                    AND PI.DATEPORTAGE <= ?
                     $filter
                 ";
 
-        $this->statement = $this->mainDb->executeQuery($query, $params);
+        $this->statement = $this->main->executeQuery($query, $params);
     }
 
     public function process(array $queueItem)
@@ -102,5 +101,8 @@ class IncomingPortabilityActivationQueue extends AbstractQueue implements QueueI
         $this->logger->info("About to have the provisioning activate a line with the parameters $request");
         $result = $this->provisioning->activate($request);
         $this->logger->info("Provisioning response for trying to activate {$queueItem['MSISDN']} : $result");
+
+        // Update PNM_ACTIVATION_OMG to avoid doing this twice
+        $this->main->updatePortabilityStatusWithNumAbo($queueItem['IDPORTAGE'], $result->numAbo);
     }
 }

@@ -2,9 +2,9 @@
 namespace Omea\GestionTelco\PortabilityBundle\Services\Queues;
 
 use Psr\Log\LoggerInterface;
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Statement;
 use Omea\GestionTelco\PortabilityBundle\Services\MessagingService;
+use Omea\GestionTelco\PortabilityBundle\Services\MainRepositoryService;
 
 abstract class AbstractQueue
 {
@@ -14,8 +14,8 @@ abstract class AbstractQueue
     /** @var LoggerInterface */
     protected $logger;
 
-    /** @var Connection */
-    protected $mainDb;
+    /** @var MainRepositoryService */
+    protected $main;
 
     /** @var MessagingService */
     protected $messaging;
@@ -24,20 +24,20 @@ abstract class AbstractQueue
     protected $statement = null;
 
     /**
-     * @param LoggerInterface  $logger
-     * @param array            $config
-     * @param MessagingService $messaging
-     * @param Connection       $mainDb
+     * @param LoggerInterface       $logger
+     * @param array                 $config
+     * @param MessagingService      $messaging
+     * @param MainRepositoryService $main
      */
     public function __construct(LoggerInterface $logger,
                                 array $config,
                                 MessagingService $messaging,
-                                Connection $mainDb)
+                                MainRepositoryService $main)
     {
         $this->logger = $logger;
         $this->config = $config;
         $this->messaging = $messaging;
-        $this->mainDb = $mainDb;
+        $this->main = $main;
     }
 
     public function fetch()

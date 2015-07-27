@@ -2,7 +2,6 @@
 namespace Omea\GestionTelco\PortabilityBundle\Services;
 
 use Psr\Log\LoggerInterface;
-use Doctrine\DBAL\Connection;
 
 class DateService
 {
@@ -12,24 +11,24 @@ class DateService
     /** @var array */
     private $config;
 
-    /** @var Connection */
-    private $mainDb;
+    /** @var MainRepositoryService */
+    private $main;
 
     /** @var array */
     private $holidays = null;
 
     /**
-     * @param LoggerInterface $logger
-     * @param Connection      $mainDb
-     * @param array           $portabilityConfig
+     * @param LoggerInterface       $logger
+     * @param MainRepositoryService $main
+     * @param array                 $portabilityConfig
      */
     public function __construct(
         LoggerInterface $logger,
-        Connection $mainDb,
-        array $portabilityConfig
+        array $portabilityConfig,
+        MainRepositoryService $main
     ) {
         $this->logger = $logger;
-        $this->mainDb = $mainDb;
+        $this->main = $main;
         $this->config = $portabilityConfig;
     }
 
@@ -41,7 +40,7 @@ class DateService
     public function addOpenDays(\DateTime $date, $nbDays = 0)
     {
         $newDate = clone $date;
-        while (!($open = $this->checkOpenDate($newDate)) && $nbDays > 0) {
+        while (!($open = $this->checkOpenDate($newDate)) || $nbDays > 0) {
             $newDate->add(new \DateInterval('P1D'));
             if ($open) {
                 $nbDays--;
@@ -71,8 +70,7 @@ class DateService
     private function getHolidays()
     {
         if (empty($this->holidays)) {
-            $queryHolidays = 'SELECT VALEUR FROM PARAMETRAGE WHERE ID = ?';
-            $holidays = $this->mainDb->fetchColumn($queryHolidays, array('PNM_JOURS_FERIES'), 0);
+            $holidays = $this->main->getParametrage('PNM_JOURS_FERIES');
             $this->holidays = explode(';', $holidays);
         }
         return $this->holidays;

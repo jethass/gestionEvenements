@@ -2,31 +2,24 @@
 namespace Omea\GestionTelco\PortabilityBundle\Services\Queues;
 
 use Psr\Log\LoggerInterface;
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Statement;
 use Omea\GestionTelco\PortabilityBundle\Services\MessagingService;
+use Omea\GestionTelco\PortabilityBundle\Services\MainRepositoryService;
 use Omea\GestionTelco\PortabilityBundle\Types\Message;
 
 class MessageEmissionQueue extends AbstractQueue implements QueueInterface
 {
-    /** @var Connection */
-    protected $pnmDb;
-
     /**
-     * @param LoggerInterface  $logger
-     * @param array            $config
-     * @param MessagingService $messaging
-     * @param Connection       $mainDb
-     * @param Connection       $pnmDb
+     * @param LoggerInterface       $logger
+     * @param array                 $config
+     * @param MessagingService      $messaging
+     * @param MainRepositoryService $main
      */
     public function __construct(LoggerInterface $logger,
                                 array $config,
                                 MessagingService $messaging,
-                                Connection $mainDb,
-                                Connection $pnmDb)
+                                MainRepositoryService $main)
     {
-        parent::__construct($logger, $config, $messaging, $mainDb);
-        $this->pnmDb = $pnmDb;
+        parent::__construct($logger, $config, $messaging, $main);
     }
 
     public function prepare($population, $modulo)
@@ -64,7 +57,7 @@ class MessageEmissionQueue extends AbstractQueue implements QueueInterface
 					$filter
 					ORDER BY ID_OPO ASC";
 
-        $this->statement = $this->mainDb->executeQuery($query, $params);
+        $this->statement = $this->main->executeQuery($query, $params);
     }
 
     public function process(array $queueItem)

@@ -103,9 +103,6 @@ class ActesManagerServiceTest extends WebTestCase
             /* Appel la function handle d'ActeManager 2 fois (qui est égal au nombre de mock des evenements)*/
             $mockActeManager->expects($this->exactly(2))->method('handle');
 
-            /*vérifie que la méthode flush de l'EntityManager est appelé une seul fois */
-            $gestionEvenementManager->expects($this->once())->method('flush');
-
             /* Appel de la function handleEvenements de ActesManagerService */
             $service->handleEvenements();
 
@@ -144,9 +141,6 @@ class ActesManagerServiceTest extends WebTestCase
            $stockMsisdn = null;
            /* StockMsisdnRepository Mock va accepter plusieur fois la méthode find qui va retourné un $stockMsisdn null  */
            $mockStockMsisdnRepository->expects($this->any())->method('find')->will($this->returnValue($stockMsisdn));
-
-           /*vérifie que la méthode flush de l'EntityManager est appelé une seul fois */
-           $gestionEvenementManager->expects($this->once())->method('flush');
 
            /*vérifie que l'ActeManager n'appelle pas la function handle car on est dans la deusième partie de fonction ou on catch un erreur */
            $mockActeManager->expects($this->never())->method('handle');
@@ -216,9 +210,6 @@ class ActesManagerServiceTest extends WebTestCase
              /* Appel la function handle d'ActeManager 2 fois (qui est égal au nombre de mock des evenements)*/
             $mockActeManager->expects($this->exactly(2))->method('handle');
 
-             /*vérifie que la méthode flush de l'EntityManager est appelé une seul fois */
-            $gestionEvenementManager->expects($this->once())->method('flush');
-
             /* Appel de la function rattrapageEvenements de ActesManagerService */
             $service->rattrapageEvenements();
 
@@ -233,6 +224,7 @@ class ActesManagerServiceTest extends WebTestCase
             }
     }
     
+     /* test la partie2 RattrapageEvenements (si le rattrapage de traitement des evenements catch une erreur) */
     public function testRattrapageEvenementsKo()
     {
             /* Prépare tous les mock pour l'appel de service ActesManagerService*/
@@ -278,10 +270,7 @@ class ActesManagerServiceTest extends WebTestCase
             /*vérifie que l'ActeManager n'appelle pas la function handle car on est dans la deusième partie de fonction ou on catch un erreur */
             $mockActeManager->expects($this->never())->method('handle');
 
-            /*vérifie que la méthode flush de l'EntityManager est appelé une seul fois */
-            $gestionEvenementManager->expects($this->once())->method('flush');
-
-             /* Appel de la function handleEvenements de ActesManagerService */
+            /* Appel de la function handleEvenements de ActesManagerService */
             $service->rattrapageEvenements();
 
             foreach ($mockGestionEvenementsErreur as $gestionEvenementErreur) {

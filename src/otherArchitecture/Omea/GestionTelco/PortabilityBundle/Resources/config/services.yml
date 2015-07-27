@@ -12,8 +12,8 @@ services:
         arguments:
             - @logger
             - %omea_gestion_telco_portability.config%
-            - @omea_gestion_telco_portability.services.messaging
-            - @doctrine.dbal.main_connection
+            - @omea_gestion_telco_portability.services.utils.messaging
+            - @omea_gestion_telco_portability.services.utils.main
     omea_gestion_telco_portability.services.queues.receive:
         class: Omea\GestionTelco\PortabilityBundle\Services\Queues\MessageReceptionQueue
         parent: omea_gestion_telco_portability.services.queues.generic
@@ -27,7 +27,6 @@ services:
         class: Omea\GestionTelco\PortabilityBundle\Services\Queues\MessageEmissionQueue
         parent: omea_gestion_telco_portability.services.queues.generic
         arguments:
-            - @doctrine.dbal.pnm_ppnm_connection
         tags:
             - { name: monolog.logger, channel: message_emission }
             - { name: omea_gestion_telco_portability.queues, id: send }
@@ -36,7 +35,7 @@ services:
         parent: omea_gestion_telco_portability.services.queues.generic
         arguments:
             - @omea_gestion_telco_portability.services.date
-            - @omea_gestion_telco_portability.services.incoming_portability_creation
+            - @omea_gestion_telco_portability.services.incoming_portability
             - @omea_gestion_telco_portability.services.external.sfr_pnm
         tags:
             - { name: monolog.logger, channel: eligPE }
@@ -80,7 +79,15 @@ services:
             - { name: monolog.logger, channel: resilPS }
             - { name: omea_gestion_telco_portability.queues, id: resilPS }
     # Internal services
-    omea_gestion_telco_portability.services.messaging:
+    omea_gestion_telco_portability.services.utils.main:
+        class: Omea\GestionTelco\PortabilityBundle\Services\MainRepositoryService
+        arguments:
+            - @logger
+            - %omea_gestion_telco_portability.config%
+            - @doctrine.dbal.main_connection
+        tags:
+            - { name: monolog.logger, channel: mainSQL }
+    omea_gestion_telco_portability.services.utils.messaging:
         class: Omea\GestionTelco\PortabilityBundle\Services\MessagingService
         arguments:
             - @logger
@@ -93,19 +100,45 @@ services:
         class: Omea\GestionTelco\PortabilityBundle\Services\DateService
         arguments:
             - @logger
-            - @doctrine.dbal.main_connection
             - %omea_gestion_telco_portability.config%
+            - @omea_gestion_telco_portability.services.utils.main
         tags:
             - { name: monolog.logger, channel: dates }
-    omea_gestion_telco_portability.services.incoming_portability_creation:
-        class: Omea\GestionTelco\PortabilityBundle\Services\IncomingPortabilityCreationService
+    omea_gestion_telco_portability.services.incoming_portability:
+        class: Omea\GestionTelco\PortabilityBundle\Services\IncomingPortabilityService
         arguments:
             - @logger
             - %omea_gestion_telco_portability.config%
-            - @omea_gestion_telco_portability.services.messaging
-            - @doctrine.dbal.main_connection
+            - @omea_gestion_telco_portability.services.utils.messaging
+            - @omea_gestion_telco_portability.services.utils.main
         tags:
-            - { name: monolog.logger, channel: creationPE }
+            - { name: monolog.logger, channel: PE }
+    omea_gestion_telco_portability.services.outgoing_portability:
+        class: Omea\GestionTelco\PortabilityBundle\Services\OutgoingPortabilityService
+        arguments:
+            - @logger
+            - %omea_gestion_telco_portability.config%
+            - @omea_gestion_telco_portability.services.utils.messaging
+            - @omea_gestion_telco_portability.services.utils.main
+        tags:
+            - { name: monolog.logger, channel: PS }
+    # Webservices
+    omea_gestion_telco_portability.services.ws.incoming_portability:
+        class: Omea\GestionTelco\PortabilityBundle\Services\IncomingPortabilityWebService
+        arguments:
+            - @logger
+            - %omea_gestion_telco_portability.config%
+            - @omea_gestion_telco_portability.services.incoming_portability
+        tags:
+            - { name: monolog.logger, channel: WS_PE }
+    omea_gestion_telco_portability.services.ws.outgoing_portability:
+        class: Omea\GestionTelco\PortabilityBundle\Services\OutgoingPortabilityWebService
+        arguments:
+            - @logger
+            - %omea_gestion_telco_portability.config%
+            - @omea_gestion_telco_portability.services.outgoing_portability
+        tags:
+            - { name: monolog.logger, channel: WS_PS }
     # External services
     omea_gestion_telco_portability.services.external.billing: "@omea_gestion_telco_portability.services.external.billing.proxy"
     omea_gestion_telco_portability.services.external.email: "@omea_gestion_telco_portability.services.external.email.proxy"
@@ -186,7 +219,7 @@ services:
         arguments:
             - @logger
             - %omea_gestion_telco_portability.config%
-            - @omea_gestion_telco_portability.services.messaging
+            - @omea_gestion_telco_portability.services.utils.messaging
             - @doctrine.dbal.pnm_ppnm_connection
         tags:
             - { name: monolog.logger, channel: egp_simulator }

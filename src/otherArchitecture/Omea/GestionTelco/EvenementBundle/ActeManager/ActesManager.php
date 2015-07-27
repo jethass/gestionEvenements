@@ -59,7 +59,7 @@ class ActesManager
                 
                 // Aller on execute et on pri le dieu de l'internet
                 $acte->handle($evenement, $idClient);
-            } catch (\Exception $e) {
+            } catch (\Exceptlion $e) {
                 
                 $this->failedActe = $acteDefinition->getActe();
                 $this->actesDefinitions = $evenementsDefinition->getActesDefinition();

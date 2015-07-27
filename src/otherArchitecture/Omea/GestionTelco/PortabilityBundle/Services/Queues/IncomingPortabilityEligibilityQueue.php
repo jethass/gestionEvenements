@@ -2,11 +2,10 @@
 namespace Omea\GestionTelco\PortabilityBundle\Services\Queues;
 
 use Psr\Log\LoggerInterface;
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Statement;
 use Omea\GestionTelco\PortabilityBundle\Services\MessagingService;
+use Omea\GestionTelco\PortabilityBundle\Services\MainRepositoryService;
 use Omea\GestionTelco\PortabilityBundle\Services\DateService;
-use Omea\GestionTelco\PortabilityBundle\Services\IncomingPortabilityCreationService;
+use Omea\GestionTelco\PortabilityBundle\Services\IncomingPortabilityService;
 use Omea\GestionTelco\PortabilityBundle\Services\External\SfrPnm\SfrPnmServiceInterface;
 use Omea\GestionTelco\PortabilityBundle\Types\Message;
 
@@ -22,23 +21,23 @@ class IncomingPortabilityEligibilityQueue extends AbstractQueue implements Queue
     protected $creation;
 
     /**
-     * @param LoggerInterface                    $logger
-     * @param array                              $config
-     * @param MessagingService                   $messaging
-     * @param Connection                         $mainDb
-     * @param DateService                        $dates
-     * @param IncomingPortabilityCreationService $creation
-     * @param SfrPnmServiceInterface             $sfrPnm
+     * @param LoggerInterface            $logger
+     * @param array                      $config
+     * @param MessagingService           $messaging
+     * @param MainRepositoryService      $main
+     * @param DateService                $dates
+     * @param IncomingPortabilityService $creation
+     * @param SfrPnmServiceInterface     $sfrPnm
      */
     public function __construct(LoggerInterface $logger,
                                 array $config,
                                 MessagingService $messaging,
-                                Connection $mainDb,
+                                MainRepositoryService $main,
                                 DateService $dates,
-                                IncomingPortabilityCreationService $creation,
+                                IncomingPortabilityService $creation,
                                 SfrPnmServiceInterface $sfrPnm)
     {
-        parent::__construct($logger, $config, $messaging, $mainDb);
+        parent::__construct($logger, $config, $messaging, $main);
         $this->dates = $dates;
         $this->creation = $creation;
         $this->sfrPnm = $sfrPnm;
@@ -86,7 +85,7 @@ class IncomingPortabilityEligibilityQueue extends AbstractQueue implements Queue
                 $filter
             ";
 
-        $this->statement = $this->mainDb->executeQuery($query, $params);
+        $this->statement = $this->main->executeQuery($query, $params);
     }
 
     public function process(array $queueItem)
@@ -95,24 +94,36 @@ class IncomingPortabilityEligibilityQueue extends AbstractQueue implements Queue
         $datePortage = new \DateTime($queueItem['DATEPORTAGE']);
         $dateMin = $this->dates->addOpenDays(new \DateTime('now'), $this->config['misc']['minDaysBeforePortage']);
         if ($datePortage < $dateMin) {
-            $ok = $this->resetDatePortage($queueItem['ID_PNM_OUT_WAIT']);
+            $ok = $this->main->resetDatePortage($queueItem['ID_PNM_OUT_WAIT']);
             $this->logger->info("Invalid DATEPORTAGE {$queueItem['DATEPORTAGE']} for MSISDN {$queueItem['MSISDN']} - We tried reinitializing it : $ok");
+            
             return;
         }
 
         // SFR tells us which tranches are available
-        $opd = substr($queueItem['RIO'], 0, 2);
-        $availableTranches = $this->sfrPnm->checkAvailability($queueItem['MSISDN'], $queueItem['RIO'], $datePortage, $this->config['operators']['op'], $opd);
+        $availableTranches = $this->sfrPnm->checkAvailability($queueItem['MSISDN'], $queueItem['RIO'], $datePortage, $this->config['operators']['op']);
         if (in_array($queueItem['TRANCHE'], $availableTranches)) {
             // Good news : the requested tranche is available
             $tranche = $queueItem['TRANCHE'];
         } elseif (count($availableTranches) > 0) {
-            // Let's use the first available tranche for the same day
-            $tranche = $availableTranches[0];
+            // Let's use a random available tranche for the same day
+            $tranche = $availableTranches[mt_rand(0, count($availableTranches) - 1)];
         } else {
             // No available tranche that day
-            $ok = $this->resetDatePortage($queueItem['ID_PNM_OUT_WAIT']);
+            $ok = $this->main->resetDatePortage($queueItem['ID_PNM_OUT_WAIT']);
             $this->logger->info("Unavailable DATEPORTAGE {$queueItem['DATEPORTAGE']} for MSISDN {$queueItem['MSISDN']} - We tried reinitializing it : $ok");
+            
+            return;
+        }
+        
+        // Let's actually reserve the tranche from SFR
+        $result = $this->sfrPnm->reservePortability($queueItem['MSISDN'], $queueItem['RIO'], $datePortage, $tranche, $this->config['operators']['op']);
+        if (!$result) {
+            // No available tranche that day, somehow
+            $ok = $this->main->resetDatePortage($queueItem['ID_PNM_OUT_WAIT']);
+            $this->logger->info("Unavailable DATEPORTAGE {$queueItem['DATEPORTAGE']} for MSISDN {$queueItem['MSISDN']} - We tried reinitializing it : $ok");
+            
+            return;
         }
 
         $this->logger->info("Initializing ELI for client #{$queueItem['ID_CLIENT']}, phone number #{$queueItem['MSISDN']} with date {$queueItem['DATEPORTAGE']}, tranche $tranche");
@@ -120,20 +131,16 @@ class IncomingPortabilityEligibilityQueue extends AbstractQueue implements Queue
         // Create the ELI message and initialize some other stuff
         $statusQuery = 'UPDATE PNM_OUT_WAIT SET ACTIV_PNM_V2 = ? WHERE ID_PNM_OUT_WAIT = ?';
         try {
-            $this->creation->createIncomingPortability($queueItem['ID_CLIENT'], $queueItem['MSISDN'], $queueItem['RIO'], $queueItem['DATEDEMANDE'], $queueItem['DATEPORTAGE'], $tranche, $queueItem['ID_TRANS']);
+            $this->creation->createIncomingPortability($queueItem['ID_CLIENT'], $queueItem['MSISDN'], $queueItem['RIO'], $queueItem['DATEDEMANDE'], $queueItem['DATEPORTAGE'], $tranche);
 
             // Update PNM_OUT_WAIT for success
-            $this->mainDb->executeUpdate($statusQuery, array('1', $queueItem['ID_PNM_OUT_WAIT']));
+            $this->main->updatePnmOutWait($queueItem['ID_PNM_OUT_WAIT'], '1');
+
+            // TRANSACTION_ETAT
+            $this->main->updateTransactionStatus($queueItem['ID_TRANS'], $this->config['misc']['transactionStatus']['awaitingActivation']);
         } catch (\Exception $e) {
             // Update PNM_OUT_WAIT for failure
-            $this->mainDb->executeUpdate($statusQuery, array('3', $queueItem['ID_PNM_OUT_WAIT']));
+            $this->main->updatePnmOutWait($queueItem['ID_PNM_OUT_WAIT'], '3');
         }
-    }
-
-    protected function resetDatePortage($idPnmOutWait)
-    {
-        $query = 'UPDATE PNM_OUT_WAIT SET DATEDEMANDE = ?, DATEPORTAGE = ? WHERE ID_PNM_OUT_WAIT = ?';
-        $nbLignes = $this->mainDb->executeUpdate($query, array('0000-00-00', '0000-00-00', $idPnmOutWait));
-        return $nbLignes;
     }
 }

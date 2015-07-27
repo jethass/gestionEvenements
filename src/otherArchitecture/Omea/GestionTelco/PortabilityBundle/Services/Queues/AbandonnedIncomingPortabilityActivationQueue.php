@@ -2,9 +2,8 @@
 namespace Omea\GestionTelco\PortabilityBundle\Services\Queues;
 
 use Psr\Log\LoggerInterface;
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Statement;
 use Omea\GestionTelco\PortabilityBundle\Services\MessagingService;
+use Omea\GestionTelco\PortabilityBundle\Services\MainRepositoryService;
 use Omea\GestionTelco\PortabilityBundle\Services\DateService;
 use Omea\GestionTelco\PortabilityBundle\Services\External\Email\EmailServiceInterface;
 use Omea\GestionTelco\PortabilityBundle\Services\External\Provisioning\ProvisioningServiceInterface;
@@ -26,7 +25,7 @@ class AbandonnedIncomingPortabilityActivationQueue extends AbstractQueue impleme
      * @param LoggerInterface              $logger
      * @param array                        $config
      * @param MessagingService             $messaging
-     * @param Connection                   $mainDb
+     * @param MainRepositoryService        $main
      * @param DateService                  $dates
      * @param ProvisioningServiceInterface $provisioning
      * @param EmailServiceInterface        $email
@@ -34,12 +33,12 @@ class AbandonnedIncomingPortabilityActivationQueue extends AbstractQueue impleme
     public function __construct(LoggerInterface $logger,
                                 array $config,
                                 MessagingService $messaging,
-                                Connection $mainDb,
+                                MainRepositoryService $main,
                                 DateService $dates,
                                 ProvisioningServiceInterface $provisioning,
                                 EmailServiceInterface $email)
     {
-        parent::__construct($logger, $config, $messaging, $mainDb);
+        parent::__construct($logger, $config, $messaging, $main);
         $this->dates = $dates;
         $this->provisioning = $provisioning;
         $this->email = $email;
@@ -90,11 +89,11 @@ class AbandonnedIncomingPortabilityActivationQueue extends AbstractQueue impleme
                          OR (PI.OPERATION = 'ELI' AND CODERETOUR IN ($autoactivatedIneligibilityReturnCodes)))
                     AND PAO.RIO IS NULL
                     AND SN.ETAT = '0'
-                    AND DATEPORTAGE <= ?
+                    AND PI.DATEPORTAGE <= ?
                     $filter
                 ";
 
-        $this->statement = $this->mainDb->executeQuery($query, $params);
+        $this->statement = $this->main->executeQuery($query, $params);
     }
 
     public function process(array $queueItem)
@@ -115,15 +114,18 @@ class AbandonnedIncomingPortabilityActivationQueue extends AbstractQueue impleme
         $result = $this->provisioning->activate($request);
         $this->logger->info("Provisioning response for trying to activate {$queueItem['MSISDN']} : $result");
 
+        // Update PNM_ACTIVATION_OMG to avoid doing this twice
+        $this->main->updatePortabilityStatusWithNumAbo($queueItem['IDPORTAGE'], $result->numAbo);
+
+        // Send an email to the client
         if ($result->codeRetour != $this->config['misc']['OK']) {
             $this->email->notifyPortability($queueItem['ID_CLIENT']);
         }
 
         // If not already done, insert into PNM_ABANDON so that a client record can be created later on
         if (empty($queueItem['ABANDON'])) {
-            $abandonRequest = 'INSERT INTO PNM_CLIENT (ID_CLIENT) VALUES (?)';
-            $nbAbandon = $this->mainDb->executeUpdate($abandonRequest, $queueItem['ID_CLIENT']);
-            $this->logger->info("Client #%s inserted into PNM_ABANDON : %d", $queueItem['ID_CLIENT'], $nbAbandon);
+            $nbAbandon = $this->main->insertPnmAbandon($queueItem['ID_CLIENT']);
+            $this->logger->info("Client #{$queueItem['ID_CLIENT']} inserted into PNM_ABANDON : $nbAbandon");
         }
     }
 }

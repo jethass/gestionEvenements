@@ -48,9 +48,9 @@ class EvenementService
     }
 
     /**
-     * @param Omea\GestionTelco\EvenementBundle\Types\SaveEvenementRequest $request
+     * @param \Omea\GestionTelco\EvenementBundle\Types\SaveEvenementRequest $request
      *
-     * @return Omea\GestionTelco\EvenementBundle\Types\SaveEvenementResponse $response
+     * @return \Omea\GestionTelco\EvenementBundle\Types\SaveEvenementResponse $response
      */
     public function saveEvenement(SaveEvenementRequest $request)
     {
@@ -61,13 +61,13 @@ class EvenementService
             $logLvl = 'info';
         } catch (NotFoundException $e) {
             $logLvl = 'warning';
-            $response = new BaseResponse($e->getCode(), $e->getMessage());
+            $response = new SaveEvenementResponse($e->getCode(), $e->getMessage(),0);
         } catch (InvalidArgumentException $e) {
             $logLvl = 'warning';
-            $response = new BaseResponse($e->getCode(), $e->getMessage());
+            $response = new SaveEvenementResponse($e->getCode(), $e->getMessage(),0);
         } catch (\Exception $e) {
             $logLvl = 'error';
-            $response = new BaseResponse($e->getCode(), $e->getMessage());
+            $response = new SaveEvenementResponse($e->getCode(), $e->getMessage(),0);
         }
 
         $this->logger->$logLvl(sprintf('Save Evenement end with response: %s', print_r($response, true)));

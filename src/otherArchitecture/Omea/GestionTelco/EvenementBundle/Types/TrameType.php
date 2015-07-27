@@ -11,6 +11,8 @@ namespace Omea\GestionTelco\EvenementBundle\Types;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
 use Omea\Entity\GestionEvenements\ActeDefinition;
+use Omea\Entity\GestionEvenements\Service;
+use Omea\Entity\GestionEvenements\Acte;
 
 class TrameType extends Type
 {
@@ -42,7 +44,18 @@ class TrameType extends Type
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {
         $arr = array_map(function ($json) {
-            return new ActeDefinition($json->name, $json->options);
+            $service = new Service();
+            $service->setNom($json->name);
+
+            $acte = new Acte();
+            $acte->setService($service);
+            $acte->setOptions($json->options);
+
+            $acteDef = new ActeDefinition();
+
+            $acteDef->setActe($acte);
+
+            return $acteDef;
         }, json_decode($value));
         //convertir données JSON en array de ActeDefinition
         return ($arr);

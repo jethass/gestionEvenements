@@ -5,7 +5,7 @@ use Omea\GestionTelco\PortabilityBundle\Services\External\GenericStubService;
 
 class SfrPnmStubService extends GenericStubService implements SfrPnmServiceInterface
 {
-    public function checkAvailability($msisdn, $rio, \DateTime $datePortage, $opr, $opd)
+    public function checkAvailability($msisdn, $rio, \DateTime $datePortage, $opr)
     {
         if (in_array($opd, $this->config['operators']['mvno'])) {
             // Intra-SFR portabilities have a specific tranche

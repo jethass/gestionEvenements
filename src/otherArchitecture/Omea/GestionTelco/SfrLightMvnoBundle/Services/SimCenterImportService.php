@@ -2,8 +2,8 @@
 namespace Omea\GestionTelco\SfrLightMvnoBundle\Services;
 
 use Omea\GestionTelco\PatesBundle\Exception\TechnicalException;
-use Omea\GestionTelco\SfrLightMvnoBundle\Entity\EtatEntite;
-use Omea\GestionTelco\SfrLightMvnoBundle\Entity\EtatStock;
+use Omea\Entity\Main\EtatEntite;
+use Omea\Entity\Main\EtatStock;
 use Omea\GestionTelco\SfrLightMvnoBundle\SimCenter\StockNsceIterator;
 use Omea\GestionTelco\SfrLightMvnoBundle\SimCenter\SimCenterParser;
 use Psr\Log\LoggerInterface;
@@ -53,7 +53,7 @@ class SimCenterImportService
         $it->next();
 
 
-        $stockNsce = $em->getRepository('SfrLightMvnoBundle:StockNsce')->findOneBy(array(
+        $stockNsce = $em->getRepository('Omea\Main:StockNsce')->findOneBy(array(
             'lot' => $it->current()->getLot(),
             'imsi' => $it->current()->getImsi(),
             'iccid' => $it->current()->getIccid(),
@@ -137,10 +137,10 @@ class SimCenterImportService
         try {
             $i = 0;
 
-            $etatEntite = $em->getRepository('SfrLightMvnoBundle:EtatEntite')->find(self::DEFAULT_ETAT_ENTITE);
-            $etatStock = $em->getRepository('SfrLightMvnoBundle:EtatStock')->find(self::DEFAULT_ETAT_STOCK);
+            $etatEntite = $em->getRepository('Omea\Main:EtatEntite')->find(self::DEFAULT_ETAT_ENTITE);
+            $etatStock = $em->getRepository('Omea\Main:EtatStock')->find(self::DEFAULT_ETAT_STOCK);
 
-            /** @var \Omea\GestionTelco\SfrLightMvnoBundle\Entity\StockNsce $stockNsce */
+            /** @var Omea\Entity\Main\StockNsce $stockNsce */
             foreach ($iterator as $stockNsce) {
 
                 $this->logger->debug('Import Sim', array(
@@ -162,7 +162,7 @@ class SimCenterImportService
                 // A implémenter
                 if ($i % self::BATCH_SIZE) {
                     $em->flush();
-                    $em->clear('Omea\GestionTelco\SfrLightMvnoBundle\Entity\StockNsce');
+                    $em->clear('Omea\Entity\Main\StockNsce');
                 }
             }
             $em->flush();

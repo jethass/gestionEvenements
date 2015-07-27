@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions
+        name="GestionTelcoEvenement"
+        targetNamespace="http://omeatelecom.fr/simm/gestiontelco/evenement/v1"
+        xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
+        xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+        xmlns:tns="http://omeatelecom.fr/simm/gestiontelco/evenement/v1"
+        xmlns:xsdEvenement="http://omeatelecom.fr/simm/gestiontelco/schemas/evenement/v1"
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <wsdl:types>
+        <xsd:schema>
+            <xsd:import namespace="http://omeatelecom.fr/simm/gestiontelco/schemas/evenement/v1" schemaLocation="ApiSIMM_GestionTelco_Evenement_01.xsd"/>
+        </xsd:schema>
+    </wsdl:types>
+    <wsdl:message name="SaveEvenementRequest">
+        <wsdl:part element="xsdEvenement:SaveEvenementRequest" name="SaveEvenementRequest"/>
+    </wsdl:message>
+    <wsdl:message name="SaveEvenementResponse">
+        <wsdl:part element="xsdEvenement:SaveEvenementResponse" name="SaveEvenementResponse"/>
+    </wsdl:message>
+    <wsdl:portType name="GestionTelcoEvenementSoap12">
+        <wsdl:operation name="saveEvenement">
+            <wsdl:input message="tns:SaveEvenementRequest" name="SaveEvenementRequest"/>
+            <wsdl:output message="tns:SaveEvenementResponse" name="SaveEvenementResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="GestionTelcoEvenementSoap12" type="tns:GestionTelcoEvenementSoap12">
+        <soap12:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="saveEvenement">
+            <soap12:operation soapAction="http://omeatelecom.fr/simm/gestiontelco/evenement/ws/evenement/v1" soapActionrequired="true"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="ServiceGestionTelcoEvenement">
+        <wsdl:port binding="tns:GestionTelcoEvenementSoap12" name="GestionTelcoEvenementSoap12">
+            <soap12:address location="http://gestiontelco.bo.vm.omertelecom.fr/ws/evenement"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

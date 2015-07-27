@@ -33,18 +33,31 @@ class AddMsisdnAction extends AbstractAction implements ActionInterface
      */
     protected function getFemtoMsisdn(FemtoProvisioningMonitoring $fpm)
     {
-        $fm = null;
-        $fpmArgs = $this->transformComplementToArray($fpm->getComplement());
+        // Get the related FemtoActiveClient
+        $fac = $this->em
+            ->getRepository('OmeaGestionTelcoPatesBundle:FemtoActiveClient')
+            ->findOneBy(
+                array(
+                    'numAbo' => $fpm->getNumAbo(),
+                    'state' => $this->em
+                                ->getRepository('OmeaGestionTelcoPatesBundle:FemtoActiveClientState')
+                                ->find(FemtoActiveClientState::ACTIF)
+                )
+            );
 
-        if (isset($fpmArgs['imsi']) && !empty($fpmArgs['imsi'])) {
-            $fm = $this->em
-                ->getRepository('OmeaGestionTelcoPatesBundle:FemtoMsisdn')
-                ->findOneBy(array('msisdn' => $fpm->getMsisdn(), 'imsi' => $fpmArgs['imsi']));
-        } else {
-            $fm = $this->em
-                ->getRepository('OmeaGestionTelcoPatesBundle:FemtoMsisdn')
-                ->findOneBy(array('msisdn' => $fpm->getMsisdn()));
-        }
+        // Get the FemtoMsisdn
+        $fm = $this->em
+            ->getRepository('OmeaGestionTelcoPatesBundle:FemtoMsisdn')
+            ->findOneBy(
+                array(
+                    'msisdn' => $fpm->getMsisdn(),
+                    'fac'    => $fac,
+                    'state'  => $this->em
+                                ->getRepository('OmeaGestionTelcoPatesBundle:FemtoMsisdnState')
+                                ->find(FemtoMsisdnState::EN_ATTENTE)
+                )
+            );
+
         return $fm;
     }
     
@@ -54,11 +67,14 @@ class AddMsisdnAction extends AbstractAction implements ActionInterface
     public function callback(FemtoProvisioningMonitoring $fpm)
     {
         $fm = $this->getFemtoMsisdn($fpm);
-        $fm->setState(
-            $this->em
-                ->getRepository('OmeaGestionTelcoPatesBundle:FemtoMsisdnState')
-                ->find(FemtoMsisdnState::ACTIF)
-        );
+
+        if (null !== $fm) {
+            $fm->setState(
+                $this->em
+                    ->getRepository('OmeaGestionTelcoPatesBundle:FemtoMsisdnState')
+                    ->find(FemtoMsisdnState::ACTIF)
+            );
+        }
 
         $this->em->flush();
     }
@@ -69,12 +85,14 @@ class AddMsisdnAction extends AbstractAction implements ActionInterface
     public function callbackOnFailure(FemtoProvisioningMonitoring $fpm)
     {
         $fm = $this->getFemtoMsisdn($fpm);
-        
-        $fm->setState(
-            $this->em
-                ->getRepository('OmeaGestionTelcoPatesBundle:FemtoMsisdnState')
-                ->find(FemtoMsisdnState::EN_ERREUR)
-        );
+
+        if (null !== $fm) {
+            $fm->setState(
+                $this->em
+                    ->getRepository('OmeaGestionTelcoPatesBundle:FemtoMsisdnState')
+                    ->find(FemtoMsisdnState::EN_ERREUR)
+            );
+        }
 
         $this->em->flush();
     }

@@ -4,8 +4,10 @@ omea_gestion_telco_evenement_soap_server:
 
 omea_gestion_telco_evenement_soap_server_wsdl:
     pattern:  /wsdl
-    defaults: { _controller: 'OmeaGestionTelcoEvenementBundle:SoapServer:wsdl' }
+    defaults: { _controller: 'OmeaGestionTelcoEvenementBundle:SoapServer:wsdl', xsd: 'ApiSIMM_GestionTelco_Evenement_01.wsdl'}
 
-omea_gestion_telco_evenement_test_evenements:
-    pattern:  /test_hande_evenements
-    defaults: { _controller: 'OmeaGestionTelcoEvenementBundle:Test:handleEvent' }
+omea_gestion_telco_evenement_soap_server_xsd:
+    pattern:  /{xsd}
+    defaults: { _controller: 'OmeaGestionTelcoEvenementBundle:SoapServer:wsdl' }
+    requirements:
+        xsd:  .+\.xsd

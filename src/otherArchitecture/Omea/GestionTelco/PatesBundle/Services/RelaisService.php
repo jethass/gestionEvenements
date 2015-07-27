@@ -197,7 +197,13 @@ class RelaisService
                     $this->updateFpm($item, FemtoProvisioningMonitoringStep::PENDING);
                 } else {
                     // Error
-                    $this->updateFpm($item, FemtoProvisioningMonitoringStep::CALL_GATEWAY, 6000);
+                    if ($item->getTypeAction()->getTypeActionId() == FemtoProvisioningMonitoringAction::ACTIVATION && $response->reasonCode == 'HTTP'){
+                        $this->updateFpm($item, FemtoProvisioningMonitoringStep::PENDING, 6000);
+                    }
+                    else{
+                        $this->updateFpm($item, FemtoProvisioningMonitoringStep::CALL_GATEWAY, 6000);
+                    }
+
                     $actionClass->callbackOnFailure($item);
                 }
             }

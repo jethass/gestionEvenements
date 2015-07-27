@@ -1,7 +1,7 @@
 <?php
 namespace Omea\GestionTelco\SfrLightMvnoBundle\Tests\SimCenter;
 
-use Omea\GestionTelco\SfrLightMvnoBundle\Entity\StockNsce;
+use Omea\Entity\Main\StockNsce;
 use Omea\GestionTelco\SfrLightMvnoBundle\SimCenter\StockNsceIterator;
 
 class StockNsceIteratorTest extends \PHPUnit_Framework_TestCase

@@ -84,10 +84,7 @@ class MessagingService
                         $message->tranche,
                         $message->codeRetour);
 
-        $nbLignesInserted = $this->$db->executeUpdate($insertQuery, $values);
-        if ($nbLignesInserted != 1) {
-            throw new \Exception('Could not insert message %s into table %s', $message, $table);
-        }
+        $this->$db->executeUpdate($insertQuery, $values);
         return $this->$db->lastInsertId();
     }
 
@@ -119,5 +116,38 @@ class MessagingService
             throw new \Exception("Query $query with state = $state & id = $id updated nothing");
         }
         $this->logger->info("Updated state of element #$id in $table to $state");
+    }
+    
+    /** Gets a message stored in a given table
+     * @param  string  $table     the table the message is stored in (usually OMG_PNM_IN or OMG_PNM_OUT)
+     * @param  string  $idPortage the portability's ID
+     * @param  string  $operation the operation parameter of the message (ELI, GOP, ACQ, IND, ANR...)
+     * @return Message the message
+     */
+    public function getMessageByIdPortage($table, $idPortage, $operation)
+    {
+        switch ($table) {
+            case $this->config['messages']['tables']['in']:
+            case $this->config['messages']['tables']['out']:
+                $query = "SELECT ID, ETAT_MESSAGE, OPERATION, EMETTEUR, RECEPTEUR, MSISDN, RIO, OPR, OPRT, OPD, OPDT, OPA, OPAT, ID_PORTAGE, DATE_DEMANDE, DATE_PORTAGE, TRANCHE, CODE_RETOUR FROM $table WHERE ID_PORTAGE = ? AND OPERATION = ?";
+                $rawMessage = $this->pnmDb->fetchAssoc($query, array($idPortage, $operation));
+                break;
+            case $this->config['main']['tables']['in']:
+                $query = "SELECT ID_OPI, ETAT, OPERATION, EMETTEUR, RECEPTEUR, MSISDN, RIO, OPR, OPRT, OPD, OPDT, OPA, OPAT, IDPORTAGE, DATEDEMANDE, DATEPORTAGE, TRANCHE, CODERETOUR FROM $table WHERE IDPORTAGE = ? AND OPERATION = ?";
+                $rawMessage = $this->mainDb->fetchAssoc($query, array($idPortage, $operation));
+                break;
+            case $this->config['main']['tables']['out']:
+                $query = "SELECT ID_OPO, ETAT, OPERATION, EMETTEUR, RECEPTEUR, MSISDN, RIO, OPR, OPRT, OPD, OPDT, OPA, OPAT, IDPORTAGE, DATEDEMANDE, DATEPORTAGE, TRANCHE, CODERETOUR FROM $table WHERE IDPORTAGE = ? AND OPERATION = ?";
+                $rawMessage = $this->mainDb->fetchAssoc($query, array($idPortage, $operation));
+                break;
+            default:
+                throw new \Exception("We do not know how to retrieve messages from table $table");
+        }
+
+        if (empty($rawMessage)) {
+            throw new \Exception("No message $operation for portage #$idPortage in $table");
+        }
+        
+        return new Message($rawMessage);
     }
 }

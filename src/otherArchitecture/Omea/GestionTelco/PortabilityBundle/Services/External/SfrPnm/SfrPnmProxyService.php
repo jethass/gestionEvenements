@@ -5,7 +5,7 @@ use Omea\GestionTelco\PortabilityBundle\Services\External\GenericProxyService;
 
 class SfrPnmProxyService extends GenericProxyService implements SfrPnmServiceInterface
 {
-    public function checkAvailability($msisdn, $rio, \DateTime $datePortage, $opr, $opd)
+    public function checkAvailability($msisdn, $rio, \DateTime $datePortage, $opr)
     {
         $request = array('msisdn'      => $msisdn,
                          'rio'         => $rio,

@@ -1,7 +1,7 @@
 <?php
 namespace Omea\GestionTelco\SfrLightMvnoBundle\SimCenter;
 
-use Omea\GestionTelco\SfrLightMvnoBundle\Entity\StockNsce;
+use Omea\Entity\Main\StockNsce;
 
 class StockNsceIterator implements \Iterator, \Countable
 {

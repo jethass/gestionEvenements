@@ -1,3 +1,15 @@
-omea_gestion_telco_portability_homepage:
-    path:     /hello/{name}
-    defaults: { _controller: OmeaGestionTelcoPortabilityBundle:Default:index }
+omea_gestion_telco_portability_incoming_server:
+    path:     /incoming
+    defaults: { _controller: OmeaGestionTelcoPortabilityBundle:SoapServer:incomingServer }
+
+omea_gestion_telco_portability_incoming_server_wsdl:
+    path:     /incoming/wsdl
+    defaults: { _controller: OmeaGestionTelcoPortabilityBundle:SoapServer:incomingWsdl }
+
+omea_gestion_telco_portability_outgoing_server:
+    path:     /outgoing
+    defaults: { _controller: OmeaGestionTelcoPortabilityBundle:SoapServer:outgoingServer }
+
+omea_gestion_telco_portability_outgoing_server_wsdl:
+    path:     /outgoing/wsdl
+    defaults: { _controller: OmeaGestionTelcoPortabilityBundle:SoapServer:outgoingWsdl }

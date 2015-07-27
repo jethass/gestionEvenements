@@ -2,8 +2,7 @@
 namespace Omea\GestionTelco\PortabilityBundle\Services\Queues;
 
 use Psr\Log\LoggerInterface;
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Statement;
+use Omea\GestionTelco\PortabilityBundle\Services\MainRepositoryService;
 use Omea\GestionTelco\PortabilityBundle\Services\MessagingService;
 use Omea\GestionTelco\PortabilityBundle\Services\DateService;
 use Omea\GestionTelco\PortabilityBundle\Types\Message;
@@ -12,19 +11,19 @@ use Omea\GestionTelco\PortabilityBundle\Exception\EligibilityException;
 class OutgoingPortabilityEligibilityQueue extends AbstractQueue implements QueueInterface
 {
     /**
-     * @param LoggerInterface  $logger
-     * @param array            $config
-     * @param MessagingService $messaging
-     * @param Connection       $mainDb
-     * @param DateService      $dates
+     * @param LoggerInterface       $logger
+     * @param array                 $config
+     * @param MessagingService      $messaging
+     * @param MainRepositoryService $main
+     * @param DateService           $dates
      */
     public function __construct(LoggerInterface $logger,
                                 array $config,
                                 MessagingService $messaging,
-                                Connection $mainDb,
+                                MainRepositoryService $main,
                                 DateService $dates)
     {
-        parent::__construct($logger, $config, $messaging, $mainDb);
+        parent::__construct($logger, $config, $messaging, $main);
         $this->dates = $dates;
     }
 
@@ -61,6 +60,7 @@ class OutgoingPortabilityEligibilityQueue extends AbstractQueue implements Queue
                     PI.DATEPORTAGE,
                     PI.TRANCHE,
                     SM.MSISDN AS MSISDN_SM,
+                    SM.ID_CLIENT,
                     SM.RIO AS RIO_SM,
                     SMRIO.MSISDN as MSISDN_RIO,
                     SMRIO.RIO AS RIO_RIO,
@@ -82,7 +82,7 @@ class OutgoingPortabilityEligibilityQueue extends AbstractQueue implements Queue
                 $filter
                 ";
 
-        $this->statement = $this->mainDb->executeQuery($query, $params);
+        $this->statement = $this->main->executeQuery($query, $params);
     }
 
     public function process(array $queueItem)
@@ -166,6 +166,11 @@ class OutgoingPortabilityEligibilityQueue extends AbstractQueue implements Queue
 
             // We're actually eligible !
             $message->codeRetour = $this->config['misc']['successReturnCode'];
+            
+            // Initialize PNM_ACTIVATION_OMG
+            $this->main->createPortabilityStatus('PS', $queueItem['ID_CLIENT'], $queueItem['MSISDN'], $queueItem['RIO'], $queueItem['IDPORTAGE'], $queueItem['DATEDEMANDE'], $queueItem['DATEPORTAGE'], $queueItem['TRANCHE']);
+            
+            
             $this->logger->info("Portability #{$queueItem['IDPORTAGE']} of {$queueItem['MSISDN']} is eligible");
         } catch (EligibilityException $e) {
             $message->codeRetour = (string) $e->getCode();

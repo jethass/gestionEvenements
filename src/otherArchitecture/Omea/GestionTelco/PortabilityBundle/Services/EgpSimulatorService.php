@@ -110,7 +110,7 @@ class EgpSimulatorService
                 $message->recepteur = 'RR';
                 $message->opdt = empty($opdt) ? $message->opd : $opdt;
                 $message->opa = empty($opa) ? $message->opd : $opa;
-                $message->opd = empty($opat) ? $message->opa : $opat;
+                $message->opat = empty($opat) ? $message->opa : $opat;
                 if (empty($returnCode)) {
                     throw new \Exception("Please supply a returncode for this operation");
                 }

@@ -73,7 +73,7 @@ class SMSActe implements ActeInterface, ConfigurableActeInterface
 
         }
     }
-    
+
     /**
      * Appel du ws pour tester si le client est eligible au pass dooble trotter
      * 

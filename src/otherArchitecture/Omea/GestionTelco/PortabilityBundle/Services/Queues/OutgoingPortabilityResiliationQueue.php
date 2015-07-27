@@ -2,9 +2,8 @@
 namespace Omea\GestionTelco\PortabilityBundle\Services\Queues;
 
 use Psr\Log\LoggerInterface;
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Statement;
 use Omea\GestionTelco\PortabilityBundle\Services\MessagingService;
+use Omea\GestionTelco\PortabilityBundle\Services\MainRepositoryService;
 use Omea\GestionTelco\PortabilityBundle\Services\DateService;
 use Omea\GestionTelco\PortabilityBundle\Services\External\Billing\BillingServiceInterface;
 use Omea\GestionTelco\PortabilityBundle\Services\External\MobileOption\MobileOptionServiceInterface;
@@ -30,7 +29,7 @@ class OutgoingPortabilityResiliationQueue extends AbstractQueue implements Queue
      * @param LoggerInterface              $logger
      * @param array                        $config
      * @param MessagingService             $messaging
-     * @param Connection                   $mainDb
+     * @param MainRepositoryService        $main
      * @param DateService                  $dates
      * @param ProvisioningServiceInterface $provisioning
      * @param BillingServiceInterface      $billing
@@ -39,13 +38,13 @@ class OutgoingPortabilityResiliationQueue extends AbstractQueue implements Queue
     public function __construct(LoggerInterface $logger,
                                 array $config,
                                 MessagingService $messaging,
-                                Connection $mainDb,
+                                MainRepositoryService $main,
                                 DateService $dates,
                                 ProvisioningServiceInterface $provisioning,
                                 BillingServiceInterface $billing,
                                 MobileOptionServiceInterface $mobileOption)
     {
-        parent::__construct($logger, $config, $messaging, $mainDb);
+        parent::__construct($logger, $config, $messaging, $main);
         $this->dates = $dates;
         $this->provisioning = $provisioning;
         $this->billing = $billing;
@@ -94,13 +93,13 @@ class OutgoingPortabilityResiliationQueue extends AbstractQueue implements Queue
                 WHERE
                     PI.RECEPTEUR = 'DD'
                     AND PI.OPERATION = 'GOP'
-                    AND PAO.RIO IS NULL
+                    AND PAO.NUM_ABO IS NULL
                     AND PO.IDPORTAGE IS NULL
                     AND PI.DATEPORTAGE <= ?
                     $filter
                 ";
 
-        $this->statement = $this->mainDb->executeQuery($query, $params);
+        $this->statement = $this->main->executeQuery($query, $params);
     }
 
     public function process(array $queueItem)
@@ -110,6 +109,9 @@ class OutgoingPortabilityResiliationQueue extends AbstractQueue implements Queue
             $this->logger->info("Tranche {$queueItem['TRANCHE']} for #{$queueItem['ID_OPI']} for portability #{$queueItem['IDPORTAGE']} of {$queueItem['MSISDN']} will be processed at another point");
             return;
         }
+        
+        // Update PNM_ACTIVATION_OMG to avoid doing this twice
+        $this->main->updatePortabilityStatusWithNumAbo($queueItem['IDPORTAGE'], $queueItem['NUM_ABO']);
 
         // We're good, let's proceed with the resiliation
         $request = new ProvisioningResiliationRequest();
@@ -125,7 +127,10 @@ class OutgoingPortabilityResiliationQueue extends AbstractQueue implements Queue
         // And now for the annoying part : informing the billing system
         if ($queueItem['ID_TE'] != '2') {
             if (!empty($queueItem['FLAG_RESI'])) {
-                $this->clearResiliation($queueItem['ID_CLIENT'], $queueItem['NUM_ABO'], $queueItem['ID_TRAITEMENTMIC_ZSMART']);
+                $nbDeletedRows = $this->main->clearResiliation($queueItem['ID_CLIENT']);
+                if ($nbLignesDeleted > 0) {
+                    $this->billing->createCancellationMIC($queueItem['ID_CLIENT'], $queueItem['NUM_ABO'], $queueItem['ID_TRAITEMENTMIC_ZSMART']);
+                }
             }
 
             // MANTIS 0022469 : VIP subscriptions get special resiliation types
@@ -150,28 +155,7 @@ class OutgoingPortabilityResiliationQueue extends AbstractQueue implements Queue
             }
 
             // Register the resiliation
-            $this->setResiliation($queueItem['ID_CLIENT'], $typeResil, $etatResil, $queueItem['DATEPORTAGE'], $idTraitementMic);
-        }
-    }
-
-    protected function clearResiliation($idClient, $numAbo, $idTraitementMic)
-    {
-        $deleteQuery = "DELETE FROM RESILIATION WHERE ID_CLIENT = ?";
-
-        $nbLignesDeleted = $this->mainDb->executeUpdate($deleteQuery, array($idClient));
-        if ($nbLignesDeleted > 0) {
-            $this->billing->createCancellationMIC($idClient, $numAbo, $idTraitementMic);
-        }
-    }
-
-    protected function setResiliation($idClient, $typeResil, $etatResil, $dateResil, $idTraitementMic = null)
-    {
-        $insertQuery = "INSERT INTO RESILIATION (ID_CLIENT, TYPE_RESIL, ETAT, PORTABILITE, DATE_RESILIATION, ID_TRAITEMENTMIC_ZSMART) VALUES (?, ?, ?, '0', ?, ?)";
-        $values = array($idClient, $typeResil, $etatResil, $dateResil, $idTraitementMic);
-
-        $nbLignesInserted = $this->mainDb->executeUpdate($insertQuery, $values);
-        if ($nbLignesInserted != 1) {
-            throw new \Exception('Could not create resiliation for client %s', $idClient);
+            $this->main->setResiliation($queueItem['ID_CLIENT'], $typeResil, $etatResil, $queueItem['DATEPORTAGE'], $idTraitementMic);
         }
     }
 }

@@ -12,35 +12,14 @@ use Symfony\Component\HttpFoundation\Response;
 class SoapServerController extends Controller
 {
     /**
-     * Show the wsdl using the zend autodiscover.
+     * WSDL & XSD de gestionTelcoEvenement
      *
      * @return Response
      */
-    public function wsdlAction()
+    public function wsdlAction($xsd = null)
     {
-//        $uri = $this->get('router')->generate('omea_gestion_telco_evenement_soap_server', array(), true);
-//        $autodiscover = new AutoDiscover();
-//        $autodiscover->setComplexTypeStrategy(new ArrayOfTypeComplex());
-//        $autodiscover->setClass('Omea\GestionTelco\EvenementBundle\Services\EvenementService')
-//            ->setUri($uri)
-//            ->setServiceName('wsGestionTelcoEvenement')
-//            ->setOperationBodyStyle(array("use" => "literal"))
-//            ->setBindingStyle(array("style" => "document"));
-//
-//
-//        $wsdl = $autodiscover->generate();
-//
-//        $response = new Response($wsdl->toXml());
-//        $response->headers->set('Content-Type', 'text/xml');
-//
-//        return $response;
-        $uri = $this->get('router')->generate('omea_gestion_telco_evenement_soap_server', array(), true);
-        $response = new Response();
-        $response->headers->set('Content-Type', 'text/xml');
-        $twig = $this->container->get('templating');
-        $content = $twig->render("OmeaGestionTelcoEvenementBundle:wsdl:evenementWsdl.xml.twig",array('url_soap_action'=>$uri));
-        $response->setContent($content);
-        return ($response);
+        $xsdFile = $this->get('file_locator')->locate('@OmeaGestionTelcoEvenementBundle/Resources/wsdl/' . $xsd);
+        return new Response(file_get_contents($xsdFile), 200, array('Content-Type' => 'text/xml'));
     }
 
     /**
@@ -50,17 +29,19 @@ class SoapServerController extends Controller
      */
     public function soapAction()
     {
-        $wsdlUri = $this->get('router')->generate('omea_gestion_telco_evenement_soap_server_wsdl', array(), true);
+        $wsdlUri = $this
+            ->get('router')
+            ->generate('omea_gestion_telco_evenement_soap_server_wsdl', array(), true);
 
         $options = array(
             'classmap' => array(
-                'BaseResponse' => 'Omea\\GestionTelco\\EvenementBundle\\Types\\BaseResponse',
                 'SaveEvenementRequest' => 'Omea\\GestionTelco\\EvenementBundle\\Types\\SaveEvenementRequest',
                 'SaveEvenementResponse' => 'Omea\\GestionTelco\\EvenementBundle\\Types\\SaveEvenementResponse',
             ),
             'returnResponse' => false,
             'cache_wsdl' => WSDL_CACHE_NONE,
         );
+
         $soapServer = new Server($wsdlUri, $options);
         $soapServer->setObject(new DocumentLiteralWrapper($this->get('omea_gestion_telco_evenement.services.evenements')));
         $response = new Response();

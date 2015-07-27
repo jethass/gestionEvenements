@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema
+        elementFormDefault="qualified"
+        targetNamespace="http://omeatelecom.fr/simm/gestiontelco/schemas/evenement/v1"
+        xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:html="http://schemas.xmlsoap.org/http/"
+        xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
+        xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+        xmlns:soapenv="http://schemas.xmlsoap.org/wsdl/envelope/"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:xsdEvenement="http://omeatelecom.fr/simm/gestiontelco/schemas/evenement/v1">
+
+    <!-- sauvegarder un événement -->
+    <xsd:element name="SaveEvenementRequest">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="msisdn" type="xsd:string"/>
+                <xsd:element name="code" type="xsd:string"/>
+                <xsd:element name="type" type="xsd:string"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="SaveEvenementResponse">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="codeRetour" type="xsd:string"/>
+                <xsd:element name="responseCode" type="xsd:int"/>
+                <xsd:element name="message" type="xsd:string"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+</xsd:schema>
